@@ -53,6 +53,13 @@ func testMovieService() {
 
 	log.Println(movieinfo)
 
+	_, err = movieSvc.DownloadMovie(ctx, v1.DownloadMovieRequest{
+		ID: res.ID,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	movieinfos, err := movieSvc.ListMovies(ctx, v1.ListMoviesRequest{})
 	if err != nil {
 		log.Fatal(err)
