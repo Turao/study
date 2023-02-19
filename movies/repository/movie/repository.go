@@ -21,11 +21,6 @@ func NewRepository() (*repository, error) {
 	}, nil
 }
 
-func (r *repository) DeleteByID(ctx context.Context, movieID movie.ID) error {
-	delete(r.movies, movieID.String())
-	return nil
-}
-
 func (r *repository) FindAll(ctx context.Context) ([]movie.Movie, error) {
 	var movies []movie.Movie
 	for _, model := range r.movies {

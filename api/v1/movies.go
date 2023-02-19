@@ -24,7 +24,9 @@ type RegisterMovieRequest struct {
 	Tenancy string `json:"tenancy"`
 }
 
-type RegisterMovieResponse struct{}
+type RegisterMovieResponse struct {
+	ID string `json:"movieId"`
+}
 
 type ListMoviesRequest struct{}
 

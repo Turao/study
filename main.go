@@ -28,7 +28,7 @@ func testMovieService() {
 	}
 
 	ctx := context.Background()
-	_, err = movieSvc.RegisterMovie(ctx, v1.RegisterMovieRequest{
+	res, err := movieSvc.RegisterMovie(ctx, v1.RegisterMovieRequest{
 		Title:   "John Wick",
 		Tenancy: "tenancy/test",
 	})
@@ -36,11 +36,27 @@ func testMovieService() {
 		log.Fatal(err)
 	}
 
-	res, err := movieSvc.ListMovies(ctx, v1.ListMoviesRequest{})
+	_, err = movieSvc.DeleteMovie(ctx, v1.DeleteMovieRequest{
+		ID: res.ID,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(res)
+
+	movieinfo, err := movieSvc.GetMovie(ctx, v1.GetMovieRequest{
+		ID: res.ID,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(movieinfo)
+
+	movieinfos, err := movieSvc.ListMovies(ctx, v1.ListMoviesRequest{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(movieinfos)
 }
 
 func testUserService() {
@@ -66,7 +82,7 @@ func testUserService() {
 	}
 
 	_, err = userSvc.DeleteUser(ctx, v1.DeleteUserRequest{
-		ID: "fake-user-id",
+		ID: res.ID,
 	})
 	if err != nil {
 		log.Fatal(err)

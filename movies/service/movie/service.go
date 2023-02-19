@@ -10,7 +10,6 @@ import (
 )
 
 type MovieRepository interface {
-	DeleteByID(ctx context.Context, movieID movie.ID) error
 	Save(ctx context.Context, movie movie.Movie) error
 	FindByID(ctx context.Context, movieID movie.ID) (movie.Movie, error)
 	FindAll(ctx context.Context) ([]movie.Movie, error)
@@ -29,7 +28,13 @@ func NewService(movieRepository MovieRepository) (*service, error) {
 }
 
 func (svc *service) DeleteMovie(ctx context.Context, req v1.DeleteMovieRequest) (v1.DeleteMovieResponse, error) {
-	err := svc.movieRepository.DeleteByID(ctx, movie.ID(req.ID))
+	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
+	if err != nil {
+		return v1.DeleteMovieResponse{}, err
+	}
+
+	movie.Delete()
+	err = svc.movieRepository.Save(ctx, movie)
 	if err != nil {
 		return v1.DeleteMovieResponse{}, err
 	}
@@ -87,5 +92,7 @@ func (svc *service) RegisterMovie(ctx context.Context, req v1.RegisterMovieReque
 		return v1.RegisterMovieResponse{}, err
 	}
 
-	return v1.RegisterMovieResponse{}, nil
+	return v1.RegisterMovieResponse{
+		ID: movie.ID().String(),
+	}, nil
 }

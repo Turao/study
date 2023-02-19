@@ -21,11 +21,6 @@ func NewRepository() (*repository, error) {
 	}, nil
 }
 
-func (r *repository) DeleteByID(ctx context.Context, userID user.ID) error {
-	delete(r.users, userID.String())
-	return nil
-}
-
 func (r *repository) Save(ctx context.Context, user user.User) error {
 	model, err := ToModel(user)
 	if err != nil {

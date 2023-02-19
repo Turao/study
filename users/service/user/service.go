@@ -11,7 +11,6 @@ import (
 )
 
 type UserRepository interface {
-	DeleteByID(ctx context.Context, userID user.ID) error
 	Save(ctx context.Context, user user.User) error
 	FindByID(ctx context.Context, userID user.ID) (user.User, error)
 }
@@ -57,7 +56,13 @@ func (svc *service) RegisterUser(ctx context.Context, req v1.RegisteUserRequest)
 
 func (svc *service) DeleteUser(ctx context.Context, req v1.DeleteUserRequest) (v1.DeleteUserResponse, error) {
 	log.Println("deleting user", req)
-	err := svc.userRepository.DeleteByID(ctx, user.ID(req.ID))
+	user, err := svc.userRepository.FindByID(ctx, user.ID(req.ID))
+	if err != nil {
+		return v1.DeleteUserResponse{}, err
+	}
+
+	user.Delete()
+	err = svc.userRepository.Save(ctx, user)
 	if err != nil {
 		return v1.DeleteUserResponse{}, err
 	}
