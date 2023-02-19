@@ -9,16 +9,18 @@ type Movies interface {
 	ListMovies(ctx context.Context, req ListMoviesRequest) (ListMoviesResponse, error)
 	GetMovie(ctx context.Context, req GetMovieRequest) (GetMovieResponse, error)
 	DeleteMovie(ctx context.Context, req DeleteMovieRequest) (DeleteMovieResponse, error)
+
+	DownloadMovie(ctx context.Context, req DownloadMovieRequest) (DownloadMovieResponse, error)
 }
 
 type Movie struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	URI       string `json:"uri"`
-	Uploaded  bool   `json:"uploaded"`
-	Tenancy   string `json:"tenancy"`
-	CreatedAt string `json:"createdAt"`
-	DeletedAt string `json:"deletedAt"`
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	URI        string `json:"uri"`
+	Downloaded bool   `json:"downloaded"`
+	Tenancy    string `json:"tenancy"`
+	CreatedAt  string `json:"createdAt"`
+	DeletedAt  string `json:"deletedAt"`
 }
 
 type RegisterMovieRequest struct {
@@ -50,3 +52,9 @@ type DeleteMovieRequest struct {
 }
 
 type DeleteMovieResponse struct{}
+
+type DownloadMovieRequest struct {
+	ID string `json:"movieId"`
+}
+
+type DownloadMovieResponse struct{}

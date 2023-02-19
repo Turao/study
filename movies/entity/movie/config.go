@@ -11,8 +11,8 @@ type config struct {
 	id    ID
 	title string
 
-	uri      string
-	uploaded bool
+	uri        string
+	downloaded bool
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time

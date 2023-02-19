@@ -39,9 +39,9 @@ func WithURI(uri string) ConfigOption {
 	}
 }
 
-func WithUploaded(uploaded bool) ConfigOption {
+func WithDownloaded(downloaded bool) ConfigOption {
 	return func(cfg *config) error {
-		cfg.uploaded = uploaded
+		cfg.downloaded = downloaded
 		return nil
 	}
 }

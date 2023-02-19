@@ -67,12 +67,12 @@ func (svc *service) ListMovies(ctx context.Context, req v1.ListMoviesRequest) (v
 	res := v1.ListMoviesResponse{Movies: make([]v1.Movie, 0)}
 	for _, movie := range movies {
 		res.Movies = append(res.Movies, v1.Movie{
-			ID:        movie.ID().String(),
-			Title:     movie.Title(),
-			URI:       movie.URI(),
-			Uploaded:  movie.Uploaded(),
-			Tenancy:   movie.Tenancy().String(),
-			CreatedAt: movie.CreatedAt().String(),
+			ID:         movie.ID().String(),
+			Title:      movie.Title(),
+			URI:        movie.URI(),
+			Downloaded: movie.Downloaded(),
+			Tenancy:    movie.Tenancy().String(),
+			CreatedAt:  movie.CreatedAt().String(),
 			// DeletedAt: movie.DeletedAt().String(),
 		})
 	}
@@ -98,4 +98,21 @@ func (svc *service) RegisterMovie(ctx context.Context, req v1.RegisterMovieReque
 	return v1.RegisterMovieResponse{
 		ID: movie.ID().String(),
 	}, nil
+}
+
+func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieRequest) (v1.DownloadMovieResponse, error) {
+	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
+	if err != nil {
+		return v1.DownloadMovieResponse{}, err
+	}
+
+	// todo: download logic
+
+	movie.MarkAsDownloaded()
+	err = svc.movieRepository.Save(ctx, movie)
+	if err != nil {
+		return v1.DownloadMovieResponse{}, err
+	}
+
+	return v1.DownloadMovieResponse{}, nil
 }

@@ -10,12 +10,12 @@ import (
 
 func ToModel(movie movie.Movie) (*Model, error) {
 	model := &Model{
-		ID:        movie.ID().String(),
-		Title:     movie.Title(),
-		URI:       movie.URI(),
-		Uploaded:  movie.Uploaded(),
-		Tenancy:   movie.Tenancy().String(),
-		CreatedAt: movie.CreatedAt().UnixMilli(),
+		ID:         movie.ID().String(),
+		Title:      movie.Title(),
+		URI:        movie.URI(),
+		Downloaded: movie.Downloaded(),
+		Tenancy:    movie.Tenancy().String(),
+		CreatedAt:  movie.CreatedAt().UnixMilli(),
 	}
 
 	if movie.DeletedAt() != nil {
@@ -37,7 +37,7 @@ func ToEntity(model Model) (movie.Movie, error) {
 		movie.WithID(movie.ID(model.ID)),
 		movie.WithTitle(model.Title),
 		movie.WithURI(model.URI),
-		movie.WithUploaded(model.Uploaded),
+		movie.WithDownloaded(model.Downloaded),
 		movie.WithTenancy(metadata.Tenancy(model.Tenancy)),
 		movie.WithCreatedAt(time.UnixMilli(model.CreatedAt)),
 		movie.WithDeletedAt(deletedAt),
