@@ -106,6 +106,10 @@ func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieReque
 		return v1.DownloadMovieResponse{}, err
 	}
 
+	if movie.Downloaded() {
+		return v1.DownloadMovieResponse{}, nil // skip
+	}
+
 	// todo: download logic
 
 	movie.MarkAsDownloaded()
