@@ -7,9 +7,43 @@ import (
 	v1 "github.com/turao/topics/api/v1"
 	userRepository "github.com/turao/topics/users/repository/user"
 	userService "github.com/turao/topics/users/service/user"
+
+	movieRepository "github.com/turao/topics/movies/repository/movie"
+	movieService "github.com/turao/topics/movies/service/movie"
 )
 
 func main() {
+	testMovieService()
+}
+
+func testMovieService() {
+	movieRepo, err := movieRepository.NewRepository()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	movieSvc, err := movieService.NewService(movieRepo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+	_, err = movieSvc.RegisterMovie(ctx, v1.RegisterMovieRequest{
+		Title:   "John Wick",
+		Tenancy: "tenancy/test",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := movieSvc.ListMovies(ctx, v1.ListMoviesRequest{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(res)
+}
+
+func testUserService() {
 	userRepo, err := userRepository.NewRepository()
 	if err != nil {
 		log.Fatal(err)

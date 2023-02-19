@@ -8,8 +8,13 @@ import (
 
 type ID string
 
+func (id ID) String() string {
+	return string(id)
+}
+
 type Movie interface {
 	ID() ID
+	Title() string
 
 	Delete()
 	metadata.Auditable
@@ -30,6 +35,10 @@ func NewMovie(cfg config) *movie {
 
 func (m *movie) ID() ID {
 	return m.cfg.id
+}
+
+func (m *movie) Title() string {
+	return m.cfg.title
 }
 
 func (m *movie) Tenancy() metadata.Tenancy {

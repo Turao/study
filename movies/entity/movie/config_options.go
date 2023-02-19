@@ -9,7 +9,27 @@ import (
 
 type ConfigOption func(*config) error
 
-func Tenancy(tenancy metadata.Tenancy) ConfigOption {
+func WithID(id ID) ConfigOption {
+	return func(cfg *config) error {
+		if id == "" {
+			return errors.New("empty id")
+		}
+		cfg.id = id
+		return nil
+	}
+}
+
+func WithTitle(title string) ConfigOption {
+	return func(cfg *config) error {
+		if title == "" {
+			return errors.New("empty title")
+		}
+		cfg.title = title
+		return nil
+	}
+}
+
+func WithTenancy(tenancy metadata.Tenancy) ConfigOption {
 	return func(cfg *config) error {
 		if tenancy != metadata.TenancyTesting && tenancy != metadata.TenancyProduction {
 			return errors.New("invalid tenancy")
@@ -19,7 +39,7 @@ func Tenancy(tenancy metadata.Tenancy) ConfigOption {
 	}
 }
 
-func CreatedAt(createdAt time.Time) ConfigOption {
+func WithCreatedAt(createdAt time.Time) ConfigOption {
 	return func(cfg *config) error {
 		if createdAt.After(time.Now()) {
 			return errors.New("createdAt date cannot be in the future")
@@ -29,12 +49,13 @@ func CreatedAt(createdAt time.Time) ConfigOption {
 	}
 }
 
-func DeletedAt(deletedAt time.Time) ConfigOption {
+func WithDeletedAt(deletedAt *time.Time) ConfigOption {
 	return func(cfg *config) error {
-		if deletedAt.Before(cfg.createdAt) {
+		if deletedAt != nil && deletedAt.Before(cfg.createdAt) {
 			return errors.New("deletedAt date cannot be before createdAt")
 		}
-		cfg.deletedAt = &deletedAt
+
+		cfg.deletedAt = deletedAt
 		return nil
 	}
 }

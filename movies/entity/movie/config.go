@@ -8,7 +8,8 @@ import (
 )
 
 type config struct {
-	id ID
+	id    ID
+	title string
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time
@@ -18,6 +19,7 @@ type config struct {
 func NewConfig(opts ...ConfigOption) (config, []error) {
 	cfg := config{
 		id:        ID(uuid.Must(uuid.NewV4()).String()),
+		title:     "movie",
 		tenancy:   metadata.TenancyTesting,
 		createdAt: time.Now(),
 	}
