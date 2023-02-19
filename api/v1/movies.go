@@ -14,6 +14,8 @@ type Movies interface {
 type Movie struct {
 	ID        string `json:"id"`
 	Title     string `json:"title"`
+	URI       string `json:"uri"`
+	Uploaded  bool   `json:"uploaded"`
 	Tenancy   string `json:"tenancy"`
 	CreatedAt string `json:"createdAt"`
 	DeletedAt string `json:"deletedAt"`
@@ -21,6 +23,7 @@ type Movie struct {
 
 type RegisterMovieRequest struct {
 	Title   string `json:"title"`
+	URI     string `json:"uri"`
 	Tenancy string `json:"tenancy"`
 }
 

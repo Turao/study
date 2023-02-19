@@ -1,8 +1,10 @@
 package movie
 
 type Model struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	URI      string `json:"uri"`
+	Uploaded bool   `json:"uploaded"`
 
 	Tenancy string `json:"tenancy"`
 

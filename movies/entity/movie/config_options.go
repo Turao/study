@@ -29,6 +29,23 @@ func WithTitle(title string) ConfigOption {
 	}
 }
 
+func WithURI(uri string) ConfigOption {
+	return func(cfg *config) error {
+		if uri == "" {
+			return errors.New("empty uri")
+		}
+		cfg.uri = uri
+		return nil
+	}
+}
+
+func WithUploaded(uploaded bool) ConfigOption {
+	return func(cfg *config) error {
+		cfg.uploaded = uploaded
+		return nil
+	}
+}
+
 func WithTenancy(tenancy metadata.Tenancy) ConfigOption {
 	return func(cfg *config) error {
 		if tenancy != metadata.TenancyTesting && tenancy != metadata.TenancyProduction {

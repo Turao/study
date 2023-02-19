@@ -69,6 +69,8 @@ func (svc *service) ListMovies(ctx context.Context, req v1.ListMoviesRequest) (v
 		res.Movies = append(res.Movies, v1.Movie{
 			ID:        movie.ID().String(),
 			Title:     movie.Title(),
+			URI:       movie.URI(),
+			Uploaded:  movie.Uploaded(),
 			Tenancy:   movie.Tenancy().String(),
 			CreatedAt: movie.CreatedAt().String(),
 			// DeletedAt: movie.DeletedAt().String(),
@@ -80,6 +82,7 @@ func (svc *service) ListMovies(ctx context.Context, req v1.ListMoviesRequest) (v
 func (svc *service) RegisterMovie(ctx context.Context, req v1.RegisterMovieRequest) (v1.RegisterMovieResponse, error) {
 	moviecfg, errs := movie.NewConfig(
 		movie.WithTitle(req.Title),
+		movie.WithURI(req.URI),
 		movie.WithTenancy(metadata.Tenancy(req.Tenancy)),
 	)
 	if len(errs) > 0 {

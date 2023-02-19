@@ -15,6 +15,8 @@ func (id ID) String() string {
 type Movie interface {
 	ID() ID
 	Title() string
+	URI() string
+	Uploaded() bool
 
 	Delete()
 	metadata.Auditable
@@ -39,6 +41,14 @@ func (m *movie) ID() ID {
 
 func (m *movie) Title() string {
 	return m.cfg.title
+}
+
+func (m *movie) URI() string {
+	return m.cfg.uri
+}
+
+func (m *movie) Uploaded() bool {
+	return m.cfg.uploaded
 }
 
 func (m *movie) Tenancy() metadata.Tenancy {

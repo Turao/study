@@ -11,6 +11,9 @@ type config struct {
 	id    ID
 	title string
 
+	uri      string
+	uploaded bool
+
 	tenancy   metadata.Tenancy
 	createdAt time.Time
 	deletedAt *time.Time

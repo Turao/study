@@ -30,6 +30,7 @@ func testMovieService() {
 	ctx := context.Background()
 	res, err := movieSvc.RegisterMovie(ctx, v1.RegisterMovieRequest{
 		Title:   "John Wick",
+		URI:     "uri-example",
 		Tenancy: "tenancy/test",
 	})
 	if err != nil {
