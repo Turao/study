@@ -109,15 +109,7 @@ func (svc *service) RegisterMovie(ctx context.Context, req apiV1.RegisterMovieRe
 		return apiV1.RegisterMovieResponse{}, err
 	}
 
-	log.Println(eventsV1.MovieRegistered{
-		ID:         movie.ID().String(),
-		Title:      movie.Title(),
-		URI:        movie.URI(),
-		Downloaded: movie.Downloaded(),
-		Tenancy:    movie.Tenancy().String(),
-		CreatedAt:  movie.CreatedAt().String(),
-		// DeletedAt: movie.DeletedAt().String(),
-	})
+	log.Println(eventsV1.NewMovieRegistered(movie))
 
 	return apiV1.RegisterMovieResponse{
 		ID: movie.ID().String(),

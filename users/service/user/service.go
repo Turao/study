@@ -49,13 +49,7 @@ func (svc *service) RegisterUser(ctx context.Context, req apiV1.RegisteUserReque
 		return apiV1.RegisterUserResponse{}, err
 	}
 
-	log.Println(eventsV1.UserRegistered{
-		ID:        user.ID().String(),
-		Email:     user.Email(),
-		FirstName: user.FirstName(),
-		LastName:  user.LastName(),
-		Tenancy:   user.Tenancy().String(),
-	})
+	log.Println(eventsV1.NewUserRegistered(user))
 
 	log.Println("user registered succesfully")
 	return apiV1.RegisterUserResponse{
