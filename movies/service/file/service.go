@@ -3,7 +3,7 @@ package file
 import (
 	"context"
 
-	v1 "github.com/turao/topics/api/v1"
+	v1 "github.com/turao/topics/api/movies/v1"
 	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )

@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	v1 "github.com/turao/topics/api/v1"
+	moviesV1 "github.com/turao/topics/api/movies/v1"
+	usersV1 "github.com/turao/topics/api/users/v1"
 	userRepository "github.com/turao/topics/users/repository/user"
 	userService "github.com/turao/topics/users/service/user"
 
@@ -35,7 +36,7 @@ func testMovieService() {
 	}
 
 	ctx := context.Background()
-	res, err := movieSvc.RegisterMovie(ctx, v1.RegisterMovieRequest{
+	res, err := movieSvc.RegisterMovie(ctx, moviesV1.RegisterMovieRequest{
 		Title:   "John Wick",
 		URI:     "uri-example",
 		Tenancy: "tenancy/test",
@@ -44,14 +45,14 @@ func testMovieService() {
 		log.Fatal(err)
 	}
 
-	_, err = movieSvc.DeleteMovie(ctx, v1.DeleteMovieRequest{
+	_, err = movieSvc.DeleteMovie(ctx, moviesV1.DeleteMovieRequest{
 		ID: res.ID,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	movieinfo, err := movieSvc.GetMovie(ctx, v1.GetMovieRequest{
+	movieinfo, err := movieSvc.GetMovie(ctx, moviesV1.GetMovieRequest{
 		ID: res.ID,
 	})
 	if err != nil {
@@ -60,14 +61,14 @@ func testMovieService() {
 
 	log.Println(movieinfo)
 
-	_, err = movieSvc.DownloadMovie(ctx, v1.DownloadMovieRequest{
+	_, err = movieSvc.DownloadMovie(ctx, moviesV1.DownloadMovieRequest{
 		ID: res.ID,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	movieinfos, err := movieSvc.ListMovies(ctx, v1.ListMoviesRequest{})
+	movieinfos, err := movieSvc.ListMovies(ctx, moviesV1.ListMoviesRequest{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -78,7 +79,7 @@ func testMovieService() {
 		log.Fatal(err)
 	}
 
-	filesByMovie, err := fileSvc.ListFilesByMovie(ctx, v1.ListFilesByMovieRequest{
+	filesByMovie, err := fileSvc.ListFilesByMovie(ctx, moviesV1.ListFilesByMovieRequest{
 		MovieID: res.ID,
 	})
 	if err != nil {
@@ -101,7 +102,7 @@ func testUserService() {
 	}
 
 	ctx := context.Background()
-	res, err := userSvc.RegisterUser(ctx, v1.RegisteUserRequest{
+	res, err := userSvc.RegisterUser(ctx, usersV1.RegisteUserRequest{
 		Email:     "john@doe.com",
 		FirstName: "john",
 		LastName:  "doe",
@@ -111,14 +112,14 @@ func testUserService() {
 		log.Fatal(err)
 	}
 
-	_, err = userSvc.DeleteUser(ctx, v1.DeleteUserRequest{
+	_, err = userSvc.DeleteUser(ctx, usersV1.DeleteUserRequest{
 		ID: res.ID,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userinfo, err := userSvc.GetUserInfo(ctx, v1.GetUserInfoRequest{
+	userinfo, err := userSvc.GetUserInfo(ctx, usersV1.GetUserInfoRequest{
 		ID: res.ID,
 	})
 	if err != nil {

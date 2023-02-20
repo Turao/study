@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	v1 "github.com/turao/topics/api/v1"
+	v1 "github.com/turao/topics/api/users/v1"
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/users/entity/user"
 )
