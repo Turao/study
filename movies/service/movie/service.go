@@ -3,9 +3,11 @@ package movie
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	v1 "github.com/turao/topics/api/v1"
 	"github.com/turao/topics/metadata"
+	"github.com/turao/topics/movies/entity/chunk"
 	"github.com/turao/topics/movies/entity/movie"
 )
 
@@ -15,15 +17,26 @@ type MovieRepository interface {
 	FindAll(ctx context.Context) ([]movie.Movie, error)
 }
 
+type ChunkRespository interface {
+	FindByMovieID(ctx context.Context, movieID movie.ID) ([]chunk.Chunk, error)
+	FindByID(ctx context.Context, chunkID chunk.ID) (chunk.Chunk, error)
+	Save(ctx context.Context, chunk chunk.Chunk) error
+}
+
 type service struct {
 	movieRepository MovieRepository
+	chunkRepository ChunkRespository
 }
 
 var _ v1.Movies = (*service)(nil)
 
-func NewService(movieRepository MovieRepository) (*service, error) {
+func NewService(
+	movieRepository MovieRepository,
+	chunkRepository ChunkRespository,
+) (*service, error) {
 	return &service{
 		movieRepository: movieRepository,
+		chunkRepository: chunkRepository,
 	}, nil
 }
 
@@ -119,4 +132,29 @@ func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieReque
 	}
 
 	return v1.DownloadMovieResponse{}, nil
+}
+
+func (svc *service) SplitIntoChunks(ctx context.Context, req v1.SplitIntoChunksRequest) (v1.SplitIntoChunksResponse, error) {
+	// todo: add logic to compute how many chunks the movie needs to be split into
+	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.MovieID))
+	if err != nil {
+		return v1.SplitIntoChunksResponse{}, err
+	}
+
+	for i := 0; i < req.Chunks; i++ {
+		chunkcfg, errs := chunk.NewConfig(
+			chunk.WithMovieID(movie.ID()),
+			chunk.WithURI(fmt.Sprint(i)),
+		)
+		if len(errs) > 0 {
+			return v1.SplitIntoChunksResponse{}, errors.Join(errs...)
+		}
+		chunk := chunk.NewChunk(chunkcfg)
+		err := svc.chunkRepository.Save(ctx, chunk)
+		if err != nil {
+			return v1.SplitIntoChunksResponse{}, err
+		}
+	}
+
+	return v1.SplitIntoChunksResponse{}, nil
 }

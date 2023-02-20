@@ -11,6 +11,7 @@ type Movies interface {
 	DeleteMovie(ctx context.Context, req DeleteMovieRequest) (DeleteMovieResponse, error)
 
 	DownloadMovie(ctx context.Context, req DownloadMovieRequest) (DownloadMovieResponse, error)
+	SplitIntoChunks(ctx context.Context, req SplitIntoChunksRequest) (SplitIntoChunksResponse, error)
 }
 
 type Movie struct {
@@ -58,3 +59,10 @@ type DownloadMovieRequest struct {
 }
 
 type DownloadMovieResponse struct{}
+
+type SplitIntoChunksRequest struct {
+	MovieID string `json:"movieId"`
+	Chunks  int    `json:"chunks"`
+}
+
+type SplitIntoChunksResponse struct{}
