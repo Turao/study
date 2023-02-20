@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/turao/topics/api/v1"
 	"github.com/turao/topics/metadata"
+	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )
 
@@ -15,15 +16,26 @@ type MovieRepository interface {
 	FindAll(ctx context.Context) ([]movie.Movie, error)
 }
 
+type FileRepository interface {
+	FindByMovieID(ctx context.Context, movieID movie.ID) ([]file.File, error)
+	FindByID(ctx context.Context, fileID file.ID) (file.File, error)
+	Save(ctx context.Context, file file.File) error
+}
+
 type service struct {
 	movieRepository MovieRepository
+	fileRepository  FileRepository
 }
 
 var _ v1.Movies = (*service)(nil)
 
-func NewService(movieRepository MovieRepository) (*service, error) {
+func NewService(
+	movieRepository MovieRepository,
+	fileRepository FileRepository,
+) (*service, error) {
 	return &service{
 		movieRepository: movieRepository,
+		fileRepository:  fileRepository,
 	}, nil
 }
 
@@ -111,6 +123,21 @@ func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieReque
 	}
 
 	// todo: download logic
+	// download to disk
+	// create file
+	filecfg, errs := file.NewConfig(
+		file.WithMovieID(movie.ID()),
+		file.WithURI("movie-stored-here"),
+		file.WithSize(10000),
+	)
+	if len(errs) > 0 {
+		return v1.DownloadMovieResponse{}, errors.Join(errs...)
+	}
+	file := file.NewFile(filecfg)
+	err = svc.fileRepository.Save(ctx, file)
+	if err != nil {
+		return v1.DownloadMovieResponse{}, err
+	}
 
 	movie.MarkAsDownloaded()
 	err = svc.movieRepository.Save(ctx, movie)
