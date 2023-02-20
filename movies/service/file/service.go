@@ -3,7 +3,7 @@ package file
 import (
 	"context"
 
-	v1 "github.com/turao/topics/api/movies/v1"
+	apiV1 "github.com/turao/topics/api/movies/v1"
 	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )
@@ -18,7 +18,7 @@ type service struct {
 	fileRepository FileRepository
 }
 
-var _ v1.Files = (*service)(nil)
+var _ apiV1.Files = (*service)(nil)
 
 func NewService(
 	fileRepository FileRepository,
@@ -28,15 +28,15 @@ func NewService(
 	}, nil
 }
 
-func (svc *service) ListFilesByMovie(ctx context.Context, req v1.ListFilesByMovieRequest) (v1.ListFilesByMovieResponse, error) {
+func (svc *service) ListFilesByMovie(ctx context.Context, req apiV1.ListFilesByMovieRequest) (apiV1.ListFilesByMovieResponse, error) {
 	files, err := svc.fileRepository.FindByMovieID(ctx, movie.ID(req.MovieID))
 	if err != nil {
-		return v1.ListFilesByMovieResponse{}, err
+		return apiV1.ListFilesByMovieResponse{}, err
 	}
 
-	res := v1.ListFilesByMovieResponse{Files: make([]v1.File, 0)}
+	res := apiV1.ListFilesByMovieResponse{Files: make([]apiV1.File, 0)}
 	for _, file := range files {
-		res.Files = append(res.Files, v1.File{
+		res.Files = append(res.Files, apiV1.File{
 			ID:        file.ID().String(),
 			MovieID:   file.Movie().String(),
 			URI:       file.URI(),

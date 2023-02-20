@@ -3,8 +3,10 @@ package movie
 import (
 	"context"
 	"errors"
+	"log"
 
-	v1 "github.com/turao/topics/api/movies/v1"
+	apiV1 "github.com/turao/topics/api/movies/v1"
+	eventsV1 "github.com/turao/topics/events/movies/v1"
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
@@ -27,7 +29,7 @@ type service struct {
 	fileRepository  FileRepository
 }
 
-var _ v1.Movies = (*service)(nil)
+var _ apiV1.Movies = (*service)(nil)
 
 func NewService(
 	movieRepository MovieRepository,
@@ -39,29 +41,29 @@ func NewService(
 	}, nil
 }
 
-func (svc *service) DeleteMovie(ctx context.Context, req v1.DeleteMovieRequest) (v1.DeleteMovieResponse, error) {
+func (svc *service) DeleteMovie(ctx context.Context, req apiV1.DeleteMovieRequest) (apiV1.DeleteMovieResponse, error) {
 	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
 	if err != nil {
-		return v1.DeleteMovieResponse{}, err
+		return apiV1.DeleteMovieResponse{}, err
 	}
 
 	movie.Delete()
 	err = svc.movieRepository.Save(ctx, movie)
 	if err != nil {
-		return v1.DeleteMovieResponse{}, err
+		return apiV1.DeleteMovieResponse{}, err
 	}
 
-	return v1.DeleteMovieResponse{}, nil
+	return apiV1.DeleteMovieResponse{}, nil
 }
 
-func (svc *service) GetMovie(ctx context.Context, req v1.GetMovieRequest) (v1.GetMovieResponse, error) {
+func (svc *service) GetMovie(ctx context.Context, req apiV1.GetMovieRequest) (apiV1.GetMovieResponse, error) {
 	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
 	if err != nil {
-		return v1.GetMovieResponse{}, err
+		return apiV1.GetMovieResponse{}, err
 	}
 
-	return v1.GetMovieResponse{
-		Movie: v1.Movie{
+	return apiV1.GetMovieResponse{
+		Movie: apiV1.Movie{
 			ID:        movie.ID().String(),
 			Tenancy:   movie.Tenancy().String(),
 			CreatedAt: movie.CreatedAt().String(),
@@ -70,15 +72,15 @@ func (svc *service) GetMovie(ctx context.Context, req v1.GetMovieRequest) (v1.Ge
 	}, nil
 }
 
-func (svc *service) ListMovies(ctx context.Context, req v1.ListMoviesRequest) (v1.ListMoviesResponse, error) {
+func (svc *service) ListMovies(ctx context.Context, req apiV1.ListMoviesRequest) (apiV1.ListMoviesResponse, error) {
 	movies, err := svc.movieRepository.FindAll(ctx)
 	if err != nil {
-		return v1.ListMoviesResponse{}, err
+		return apiV1.ListMoviesResponse{}, err
 	}
 
-	res := v1.ListMoviesResponse{Movies: make([]v1.Movie, 0)}
+	res := apiV1.ListMoviesResponse{Movies: make([]apiV1.Movie, 0)}
 	for _, movie := range movies {
-		res.Movies = append(res.Movies, v1.Movie{
+		res.Movies = append(res.Movies, apiV1.Movie{
 			ID:         movie.ID().String(),
 			Title:      movie.Title(),
 			URI:        movie.URI(),
@@ -91,35 +93,45 @@ func (svc *service) ListMovies(ctx context.Context, req v1.ListMoviesRequest) (v
 	return res, nil
 }
 
-func (svc *service) RegisterMovie(ctx context.Context, req v1.RegisterMovieRequest) (v1.RegisterMovieResponse, error) {
+func (svc *service) RegisterMovie(ctx context.Context, req apiV1.RegisterMovieRequest) (apiV1.RegisterMovieResponse, error) {
 	moviecfg, errs := movie.NewConfig(
 		movie.WithTitle(req.Title),
 		movie.WithURI(req.URI),
 		movie.WithTenancy(metadata.Tenancy(req.Tenancy)),
 	)
 	if len(errs) > 0 {
-		return v1.RegisterMovieResponse{}, errors.Join(errs...)
+		return apiV1.RegisterMovieResponse{}, errors.Join(errs...)
 	}
 
 	movie := movie.NewMovie(moviecfg)
 	err := svc.movieRepository.Save(ctx, movie)
 	if err != nil {
-		return v1.RegisterMovieResponse{}, err
+		return apiV1.RegisterMovieResponse{}, err
 	}
 
-	return v1.RegisterMovieResponse{
+	log.Println(eventsV1.MovieRegistered{
+		ID:         movie.ID().String(),
+		Title:      movie.Title(),
+		URI:        movie.URI(),
+		Downloaded: movie.Downloaded(),
+		Tenancy:    movie.Tenancy().String(),
+		CreatedAt:  movie.CreatedAt().String(),
+		// DeletedAt: movie.DeletedAt().String(),
+	})
+
+	return apiV1.RegisterMovieResponse{
 		ID: movie.ID().String(),
 	}, nil
 }
 
-func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieRequest) (v1.DownloadMovieResponse, error) {
+func (svc *service) DownloadMovie(ctx context.Context, req apiV1.DownloadMovieRequest) (apiV1.DownloadMovieResponse, error) {
 	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
 	if err != nil {
-		return v1.DownloadMovieResponse{}, err
+		return apiV1.DownloadMovieResponse{}, err
 	}
 
 	if movie.Downloaded() {
-		return v1.DownloadMovieResponse{}, nil // skip
+		return apiV1.DownloadMovieResponse{}, nil // skip
 	}
 
 	// todo: download logic
@@ -131,19 +143,19 @@ func (svc *service) DownloadMovie(ctx context.Context, req v1.DownloadMovieReque
 		file.WithSize(10000),
 	)
 	if len(errs) > 0 {
-		return v1.DownloadMovieResponse{}, errors.Join(errs...)
+		return apiV1.DownloadMovieResponse{}, errors.Join(errs...)
 	}
 	file := file.NewFile(filecfg)
 	err = svc.fileRepository.Save(ctx, file)
 	if err != nil {
-		return v1.DownloadMovieResponse{}, err
+		return apiV1.DownloadMovieResponse{}, err
 	}
 
 	movie.MarkAsDownloaded()
 	err = svc.movieRepository.Save(ctx, movie)
 	if err != nil {
-		return v1.DownloadMovieResponse{}, err
+		return apiV1.DownloadMovieResponse{}, err
 	}
 
-	return v1.DownloadMovieResponse{}, nil
+	return apiV1.DownloadMovieResponse{}, nil
 }
