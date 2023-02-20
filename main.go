@@ -8,9 +8,9 @@ import (
 	userRepository "github.com/turao/topics/users/repository/user"
 	userService "github.com/turao/topics/users/service/user"
 
-	"github.com/turao/topics/movies/entity/movie"
 	fileRepository "github.com/turao/topics/movies/repository/file"
 	movieRepository "github.com/turao/topics/movies/repository/movie"
+	fileService "github.com/turao/topics/movies/service/file"
 	movieService "github.com/turao/topics/movies/service/movie"
 )
 
@@ -73,14 +73,20 @@ func testMovieService() {
 	}
 	log.Println(movieinfos)
 
-	files, err := fileRepo.FindByMovieID(ctx, movie.ID(res.ID))
+	fileSvc, err := fileService.NewService(fileRepo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, file := range files {
-		log.Println(file)
+	filesByMovie, err := fileSvc.ListFilesByMovie(ctx, v1.ListFilesByMovieRequest{
+		MovieID: res.ID,
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	log.Println(filesByMovie)
+
 }
 
 func testUserService() {

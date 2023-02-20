@@ -6,11 +6,13 @@ import (
 
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/movies/entity/file"
+	"github.com/turao/topics/movies/entity/movie"
 )
 
 func ToModel(file file.File) (*Model, error) {
 	model := &Model{
 		ID:        file.ID().String(),
+		MovieID:   file.Movie().String(),
 		URI:       file.URI(),
 		Size:      file.Size(),
 		Tenancy:   file.Tenancy().String(),
@@ -34,6 +36,7 @@ func ToEntity(model Model) (file.File, error) {
 
 	filecfg, errs := file.NewConfig(
 		file.WithID(file.ID(model.ID)),
+		file.WithMovieID(movie.ID(model.MovieID)),
 		file.WithURI(model.URI),
 		file.WithSize(model.Size),
 		file.WithTenancy(metadata.Tenancy(model.Tenancy)),

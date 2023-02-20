@@ -1,9 +1,10 @@
 package file
 
 type Model struct {
-	ID   string `json:"id"`
-	URI  string `json:"uri"`
-	Size int64  `json:"size"`
+	ID      string `json:"id"`
+	MovieID string `json:"movie_id"`
+	URI     string `json:"uri"`
+	Size    int64  `json:"size"`
 
 	Tenancy string `json:"tenancy"`
 
