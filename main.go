@@ -10,45 +10,10 @@ import (
 
 	movieRepository "github.com/turao/topics/movies/repository/movie"
 	movieService "github.com/turao/topics/movies/service/movie"
-
-	"github.com/turao/topics/movies/entity/chunk"
-	"github.com/turao/topics/movies/entity/movie"
-	chunkRepository "github.com/turao/topics/movies/repository/chunk"
 )
 
 func main() {
 	testMovieService()
-}
-
-func testChunks() {
-	chunkRepo, err := chunkRepository.NewRepository()
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx := context.Background()
-
-	chunkcfg, errs := chunk.NewConfig(
-		chunk.WithMovieID("movie"),
-		chunk.WithURI("example-uri"),
-	)
-	if len(errs) > 0 {
-		log.Fatal(errs)
-	}
-
-	chunk := chunk.NewChunk(chunkcfg)
-	err = chunkRepo.Save(ctx, chunk)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	chunks, err := chunkRepo.FindByMovieID(ctx, movie.ID("movie"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, chunk := range chunks {
-		log.Println(chunk)
-	}
 }
 
 func testMovieService() {
@@ -57,12 +22,7 @@ func testMovieService() {
 		log.Fatal(err)
 	}
 
-	chunkRepo, err := chunkRepository.NewRepository()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	movieSvc, err := movieService.NewService(movieRepo, chunkRepo)
+	movieSvc, err := movieService.NewService(movieRepo)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -105,23 +65,6 @@ func testMovieService() {
 		log.Fatal(err)
 	}
 	log.Println(movieinfos)
-
-	_, err = movieSvc.SplitIntoChunks(ctx, v1.SplitIntoChunksRequest{
-		MovieID: res.ID,
-		Chunks:  10,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	chunks, err := chunkRepo.FindByMovieID(ctx, movie.ID(res.ID))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, chunk := range chunks {
-		log.Println(chunk)
-	}
 }
 
 func testUserService() {
