@@ -6,6 +6,8 @@ import (
 
 type Files interface {
 	ListFilesByMovie(ctx context.Context, req ListFilesByMovieRequest) (ListFilesByMovieResponse, error)
+
+	DownloadFile(ctx context.Context, req DownloadFileRequest) (DownloadFileResponse, error)
 }
 
 type File struct {
@@ -25,4 +27,13 @@ type ListFilesByMovieRequest struct {
 
 type ListFilesByMovieResponse struct {
 	Files []File `json:"files"`
+}
+
+type DownloadFileRequest struct {
+	URI     string `json:"uri"`
+	MovieID string `json:"movieId"`
+}
+
+type DownloadFileResponse struct {
+	URI string `json:"uri"`
 }

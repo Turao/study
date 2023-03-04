@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/turao/topics/movies/entity/file"
+	"github.com/turao/topics/files/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )
 

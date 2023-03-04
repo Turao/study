@@ -7,8 +7,8 @@ import (
 
 	apiV1 "github.com/turao/topics/api/movies/v1"
 	eventsV1 "github.com/turao/topics/events/movies/v1"
+	"github.com/turao/topics/files/entity/file"
 	"github.com/turao/topics/metadata"
-	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )
 
@@ -26,18 +26,15 @@ type FileRepository interface {
 
 type service struct {
 	movieRepository MovieRepository
-	fileRepository  FileRepository
 }
 
 var _ apiV1.Movies = (*service)(nil)
 
 func NewService(
 	movieRepository MovieRepository,
-	fileRepository FileRepository,
 ) (*service, error) {
 	return &service{
 		movieRepository: movieRepository,
-		fileRepository:  fileRepository,
 	}, nil
 }
 
@@ -114,40 +111,4 @@ func (svc *service) RegisterMovie(ctx context.Context, req apiV1.RegisterMovieRe
 	return apiV1.RegisterMovieResponse{
 		ID: movie.ID().String(),
 	}, nil
-}
-
-func (svc *service) DownloadMovie(ctx context.Context, req apiV1.DownloadMovieRequest) (apiV1.DownloadMovieResponse, error) {
-	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
-	if err != nil {
-		return apiV1.DownloadMovieResponse{}, err
-	}
-
-	if movie.Downloaded() {
-		return apiV1.DownloadMovieResponse{}, nil // skip
-	}
-
-	// todo: download logic
-	// download to disk
-	// create file
-	filecfg, errs := file.NewConfig(
-		file.WithMovieID(movie.ID()),
-		file.WithURI("movie-stored-here"),
-		file.WithSize(10000),
-	)
-	if len(errs) > 0 {
-		return apiV1.DownloadMovieResponse{}, errors.Join(errs...)
-	}
-	file := file.NewFile(filecfg)
-	err = svc.fileRepository.Save(ctx, file)
-	if err != nil {
-		return apiV1.DownloadMovieResponse{}, err
-	}
-
-	movie.MarkAsDownloaded()
-	err = svc.movieRepository.Save(ctx, movie)
-	if err != nil {
-		return apiV1.DownloadMovieResponse{}, err
-	}
-
-	return apiV1.DownloadMovieResponse{}, nil
 }

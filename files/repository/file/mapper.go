@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/turao/topics/files/entity/file"
 	"github.com/turao/topics/metadata"
-	"github.com/turao/topics/movies/entity/file"
 	"github.com/turao/topics/movies/entity/movie"
 )
 
