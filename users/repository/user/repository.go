@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/turao/topics/users/entity/user"
+
+	redis "github.com/redis/go-redis/v9"
 )
 
 var (
@@ -12,12 +14,12 @@ var (
 )
 
 type repository struct {
-	users map[string]*Model
+	redis *redis.Client
 }
 
-func NewRepository() (*repository, error) {
+func NewRepository(redis *redis.Client) (*repository, error) {
 	return &repository{
-		users: make(map[string]*Model),
+		redis: redis,
 	}, nil
 }
 
@@ -27,14 +29,18 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 		return err
 	}
 
-	r.users[user.ID().String()] = model
-	return nil
+	return r.redis.Set(ctx, user.ID().String(), model, 0).Err()
 }
 
 func (r *repository) FindByID(ctx context.Context, userID user.ID) (user.User, error) {
-	model, found := r.users[userID.String()]
-	if !found {
+	var model Model
+	err := r.redis.Get(ctx, userID.String()).Scan(&model)
+	if err == redis.Nil {
 		return nil, ErrNotFound
 	}
-	return ToEntity(*model)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToEntity(model)
 }
