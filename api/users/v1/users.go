@@ -16,17 +16,17 @@ type RegisteUserRequest struct {
 }
 
 type RegisterUserResponse struct {
-	ID string `json:"userId"`
+	ID string `json:"id"`
 }
 
 type DeleteUserRequest struct {
-	ID string `json:"userId"`
+	ID string `json:"id"`
 }
 
 type DeleteUserResponse struct{}
 
 type GetUserInfoRequest struct {
-	ID string `json:"userId"`
+	ID string `json:"id"`
 }
 
 type GetUserInfoResponse struct {

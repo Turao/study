@@ -6,7 +6,6 @@ import (
 
 type Files interface {
 	ListFilesByMovie(ctx context.Context, req ListFilesByMovieRequest) (ListFilesByMovieResponse, error)
-
 	DownloadFile(ctx context.Context, req DownloadFileRequest) (DownloadFileResponse, error)
 }
 

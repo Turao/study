@@ -29,7 +29,7 @@ type RegisterMovieRequest struct {
 }
 
 type RegisterMovieResponse struct {
-	ID string `json:"movieId"`
+	ID string `json:"id"`
 }
 
 type ListMoviesRequest struct{}
@@ -39,7 +39,7 @@ type ListMoviesResponse struct {
 }
 
 type GetMovieRequest struct {
-	ID string `json:"movieId"`
+	ID string `json:"id"`
 }
 
 type GetMovieResponse struct {
@@ -47,13 +47,13 @@ type GetMovieResponse struct {
 }
 
 type DeleteMovieRequest struct {
-	ID string `json:"movieId"`
+	ID string `json:"id"`
 }
 
 type DeleteMovieResponse struct{}
 
 type MarkAsDownloadedRequest struct {
-	ID string `json:"movieId"`
+	ID string `json:"id"`
 }
 
 type MarkAsDownloadedResponse struct{}

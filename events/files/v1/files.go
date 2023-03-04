@@ -3,7 +3,7 @@ package files
 import "github.com/turao/topics/files/entity/file"
 
 type FileDownloaded struct {
-	ID      string `json:"fileId"`
+	ID      string `json:"id"`
 	MovieID string `json:"movieId"`
 	URI     string `json:"uri"`
 }
