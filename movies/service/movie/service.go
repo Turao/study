@@ -112,3 +112,18 @@ func (svc *service) RegisterMovie(ctx context.Context, req apiV1.RegisterMovieRe
 		ID: movie.ID().String(),
 	}, nil
 }
+
+func (svc *service) MarkAsDownloaded(ctx context.Context, req apiV1.MarkAsDownloadedRequest) (apiV1.MarkAsDownloadedResponse, error) {
+	movie, err := svc.movieRepository.FindByID(ctx, movie.ID(req.ID))
+	if err != nil {
+		return apiV1.MarkAsDownloadedResponse{}, err
+	}
+
+	movie.MarkAsDownloaded()
+	err = svc.movieRepository.Save(ctx, movie)
+	if err != nil {
+		return apiV1.MarkAsDownloadedResponse{}, err
+	}
+
+	return apiV1.MarkAsDownloadedResponse{}, nil
+}

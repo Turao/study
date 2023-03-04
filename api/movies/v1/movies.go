@@ -9,6 +9,7 @@ type Movies interface {
 	ListMovies(ctx context.Context, req ListMoviesRequest) (ListMoviesResponse, error)
 	GetMovie(ctx context.Context, req GetMovieRequest) (GetMovieResponse, error)
 	DeleteMovie(ctx context.Context, req DeleteMovieRequest) (DeleteMovieResponse, error)
+	MarkAsDownloaded(ctx context.Context, req MarkAsDownloadedRequest) (MarkAsDownloadedResponse, error)
 }
 
 type Movie struct {
@@ -50,3 +51,9 @@ type DeleteMovieRequest struct {
 }
 
 type DeleteMovieResponse struct{}
+
+type MarkAsDownloadedRequest struct {
+	ID string `json:"movieId"`
+}
+
+type MarkAsDownloadedResponse struct{}
