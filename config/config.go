@@ -6,8 +6,6 @@ type RedisConfig struct {
 	Password string
 }
 
-type Files struct{}
-type Movies struct{}
 type Users struct {
 	RedisClient RedisConfig
 }
