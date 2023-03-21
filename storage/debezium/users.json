@@ -1,0 +1,17 @@
+{
+  "name": "users-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+
+    "database.dbname": "database",
+    "database.hostname": "database",
+    "database.password": "pwd",
+    "database.port": "5432",
+    "database.user": "pguser",
+    "plugin.name": "pgoutput",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+    "schema.history.internal.kafka.topic": "schemahistory.users",
+    "topic.prefix": "cdc"
+  }
+}
