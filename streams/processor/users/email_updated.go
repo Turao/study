@@ -9,6 +9,10 @@ import (
 
 type EmailUpdated struct{}
 
+func (EmailUpdated) Name() string {
+	return "email-updated"
+}
+
 func (EmailUpdated) Inbound() string {
 	return "cdc.public.users"
 }
@@ -18,8 +22,6 @@ func (EmailUpdated) Outbound() string {
 }
 
 func (EmailUpdated) Process(data interface{}) interface{} {
-	log.Println("transforming message")
-
 	msg, ok := data.(*sarama.ConsumerMessage)
 	if !ok {
 		return nil

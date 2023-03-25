@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"sync"
 
 	"github.com/Shopify/sarama"
 	"github.com/reugn/go-streams/flow"
@@ -10,6 +11,7 @@ import (
 )
 
 type Processor interface {
+	Name() string
 	Inbound() string
 	Outbound() string
 
@@ -18,7 +20,6 @@ type Processor interface {
 
 func main() {
 	addresses := []string{"localhost:9092"}
-	groupID := "streams-2"
 
 	saramacfg := sarama.NewConfig()
 	saramacfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
@@ -26,28 +27,36 @@ func main() {
 	saramacfg.Producer.Return.Successes = true
 
 	processors := []Processor{
+		users.UserRegistered{},
 		users.EmailUpdated{},
+		users.NameUpdated{},
 	}
 
+	wg := sync.WaitGroup{}
 	for _, processor := range processors {
-		source := gostreams.NewKafkaSource(
-			context.Background(),
-			addresses,
-			groupID,
-			saramacfg,
-			processor.Inbound(),
-		)
+		wg.Add(1)
+		go func(processor Processor) {
+			defer wg.Done()
+			source := gostreams.NewKafkaSource(
+				context.Background(),
+				addresses,
+				processor.Name(),
+				saramacfg,
+				processor.Inbound(),
+			)
 
-		sink := gostreams.NewKafkaSink(
-			addresses,
-			saramacfg,
-			processor.Outbound(),
-		)
+			sink := gostreams.NewKafkaSink(
+				addresses,
+				saramacfg,
+				processor.Outbound(),
+			)
 
-		processor := flow.NewMap(processor.Process, 1)
+			mapper := flow.NewMap(processor.Process, 1)
 
-		source.
-			Via(processor).
-			To(sink)
+			source.
+				Via(mapper).
+				To(sink)
+		}(processor)
 	}
+	wg.Wait()
 }
