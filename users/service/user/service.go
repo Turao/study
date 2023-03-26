@@ -6,7 +6,6 @@ import (
 	"log"
 
 	apiV1 "github.com/turao/topics/api/users/v1"
-	eventsV1 "github.com/turao/topics/events/users/v1"
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/users/entity/user"
 )
@@ -48,8 +47,6 @@ func (svc *service) RegisterUser(ctx context.Context, req apiV1.RegisteUserReque
 	if err != nil {
 		return apiV1.RegisterUserResponse{}, err
 	}
-
-	log.Println(eventsV1.NewUserRegistered(user))
 
 	log.Println("user registered succesfully")
 	return apiV1.RegisterUserResponse{

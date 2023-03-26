@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
-	"sync"
+	"fmt"
+	"log"
 
-	"github.com/Shopify/sarama"
-	"github.com/reugn/go-streams/flow"
-	gostreams "github.com/reugn/go-streams/kafka"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
+	"github.com/ThreeDotsLabs/watermill/message/router/plugin"
 	"github.com/turao/topics/streams/processor/users"
 )
 
@@ -15,16 +18,43 @@ type Processor interface {
 	Inbound() string
 	Outbound() string
 
-	Process(event interface{}) interface{}
+	Process(msg *message.Message) ([]*message.Message, error)
 }
 
 func main() {
-	addresses := []string{"localhost:9092"}
+	logger := watermill.NewStdLogger(false, false)
 
-	saramacfg := sarama.NewConfig()
-	saramacfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	saramacfg.Consumer.Offsets.Initial = sarama.OffsetOldest
-	saramacfg.Producer.Return.Successes = true
+	router, err := message.NewRouter(
+		message.RouterConfig{},
+		logger,
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	router.AddPlugin(plugin.SignalsHandler)
+
+	subscriber, err := kafka.NewSubscriber(
+		kafka.SubscriberConfig{
+			Brokers:     []string{"localhost:9092"},
+			Unmarshaler: kafka.DefaultMarshaler{},
+		},
+		logger,
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	publisher, err := kafka.NewPublisher(
+		kafka.PublisherConfig{
+			Brokers:   []string{"localhost:9092"},
+			Marshaler: kafka.DefaultMarshaler{},
+		},
+		logger,
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	processors := []Processor{
 		users.UserRegistered{},
@@ -32,31 +62,44 @@ func main() {
 		users.NameUpdated{},
 	}
 
-	wg := sync.WaitGroup{}
+	// register handlers
 	for _, processor := range processors {
-		wg.Add(1)
-		go func(processor Processor) {
-			defer wg.Done()
-			source := gostreams.NewKafkaSource(
-				context.Background(),
-				addresses,
-				processor.Name(),
-				saramacfg,
-				processor.Inbound(),
-			)
+		poisonMiddleware, err := middleware.PoisonQueue(
+			publisher,
+			fmt.Sprintf("%s.dlq", processor.Inbound()),
+		)
+		if err != nil {
+			log.Println(err)
+			continue // skip processor
+		}
 
-			sink := gostreams.NewKafkaSink(
-				addresses,
-				saramacfg,
-				processor.Outbound(),
-			)
+		handler := router.AddHandler(
+			processor.Name(),
+			processor.Inbound(),
+			subscriber,
+			processor.Outbound(),
+			publisher,
+			processor.Process,
+		)
 
-			mapper := flow.NewMap(processor.Process, 1)
-
-			source.
-				Via(mapper).
-				To(sink)
-		}(processor)
+		handler.AddMiddleware(
+			middleware.Retry{
+				MaxRetries: 3,
+			}.Middleware,
+			poisonMiddleware,
+			middleware.Recoverer,
+		)
 	}
-	wg.Wait()
+
+	err = router.Run(context.Background())
+	defer func() {
+		err := router.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

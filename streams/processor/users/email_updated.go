@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/Shopify/sarama"
+	"github.com/ThreeDotsLabs/watermill/message"
 )
 
 type EmailUpdated struct{}
@@ -21,21 +21,12 @@ func (EmailUpdated) Outbound() string {
 	return "user.email-updated"
 }
 
-func (EmailUpdated) Process(data interface{}) interface{} {
-	msg, ok := data.(*sarama.ConsumerMessage)
-	if !ok {
-		return nil
-	}
-
-	if msg == nil {
-		return nil
-	}
-
+func (EmailUpdated) Process(msg *message.Message) ([]*message.Message, error) {
 	var event CDCEvent
-	err := json.Unmarshal(msg.Value, &event)
+	err := json.Unmarshal(msg.Payload, &event)
 	if err != nil {
 		log.Println("failed to unmarshal message")
-		return nil
+		return nil, err
 	}
 
 	// check if email has changed
@@ -50,9 +41,12 @@ func (EmailUpdated) Process(data interface{}) interface{} {
 	}
 
 	if before == after {
-		return nil
+		return nil, nil
 	}
 
 	log.Println("user email updated")
-	return data // do nothing
+	// do nothing
+	return []*message.Message{
+		msg,
+	}, nil
 }
