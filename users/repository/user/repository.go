@@ -2,24 +2,30 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/turao/topics/users/entity/user"
-
-	redis "github.com/redis/go-redis/v9"
 )
 
 var (
 	ErrNotFound = errors.New("not found")
 )
 
+const _TableName = "users"
+
 type repository struct {
-	redis *redis.Client
+	database *sql.DB
 }
 
-func NewRepository(redis *redis.Client) (*repository, error) {
+func NewRepository(database *sql.DB) (*repository, error) {
+	if database == nil {
+		return nil, errors.New("database connection is nil")
+	}
+
 	return &repository{
-		redis: redis,
+		database: database,
 	}, nil
 }
 
@@ -29,15 +35,28 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 		return err
 	}
 
-	return r.redis.Set(ctx, user.ID().String(), model, 0).Err()
+	_, err = r.database.QueryContext(
+		ctx,
+		fmt.Sprintf("INSERT INTO %s values($1, $2, $3, $4, $5, $6, $7)", _TableName),
+		model.ID,
+		model.Email,
+		model.FirstName,
+		model.LastName,
+		model.Tenancy,
+		model.CreatedAt,
+		model.DeletedAt,
+	)
+
+	return err
 }
 
 func (r *repository) FindByID(ctx context.Context, userID user.ID) (user.User, error) {
 	var model Model
-	err := r.redis.Get(ctx, userID.String()).Scan(&model)
-	if err == redis.Nil {
-		return nil, ErrNotFound
-	}
+	err := r.database.QueryRowContext(
+		ctx,
+		fmt.Sprintf("SELECT FROM %s WHERE id = $1", _TableName),
+		model.ID,
+	).Scan(&model)
 	if err != nil {
 		return nil, err
 	}

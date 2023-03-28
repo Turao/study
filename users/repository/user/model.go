@@ -1,17 +1,20 @@
 package user
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Model struct {
 	ID        string `json:"id"`
+	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
 
 	Tenancy string `json:"tenancy"`
 
-	CreatedAt int64  `json:"created_at"`
-	DeletedAt *int64 `json:"deleted_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func (m Model) MarshalBinary() ([]byte, error) {
