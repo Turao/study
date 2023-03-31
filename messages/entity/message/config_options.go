@@ -1,9 +1,10 @@
-package namespace
+package message
 
 import (
 	"errors"
 	"time"
 
+	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
 )
 
@@ -15,6 +16,16 @@ func WithID(id ID) ConfigOption {
 			return errors.New("empty id")
 		}
 		cfg.id = id
+		return nil
+	}
+}
+
+func WithChannels(channels map[channel.ID]struct{}) ConfigOption {
+	return func(cfg *config) error {
+		if len(channels) == 0 {
+			return errors.New("empty channel")
+		}
+		cfg.channels = channels
 		return nil
 	}
 }

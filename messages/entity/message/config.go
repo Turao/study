@@ -1,13 +1,15 @@
-package namespace
+package message
 
 import (
 	"time"
 
+	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
 )
 
 type config struct {
-	id ID
+	id       ID
+	channels map[channel.ID]struct{}
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time

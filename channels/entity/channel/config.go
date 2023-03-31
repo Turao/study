@@ -1,15 +1,13 @@
-package feature
+package channel
 
 import (
 	"time"
 
-	"github.com/turao/topics/feature-flags/entity/namespace"
 	"github.com/turao/topics/metadata"
 )
 
 type config struct {
-	id        ID
-	namespace namespace.ID
+	id ID
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time

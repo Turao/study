@@ -1,10 +1,9 @@
-package feature
+package channel
 
 import (
 	"errors"
 	"time"
 
-	"github.com/turao/topics/feature-flags/entity/namespace"
 	"github.com/turao/topics/metadata"
 )
 
@@ -16,16 +15,6 @@ func WithID(id ID) ConfigOption {
 			return errors.New("empty id")
 		}
 		cfg.id = id
-		return nil
-	}
-}
-
-func WithNamespace(namespace namespace.ID) ConfigOption {
-	return func(cfg *config) error {
-		if namespace == "" {
-			return errors.New("empty namespace")
-		}
-		cfg.namespace = namespace
 		return nil
 	}
 }
