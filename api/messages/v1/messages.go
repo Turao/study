@@ -7,8 +7,8 @@ type Messages interface {
 }
 
 type SendMessageRequest struct {
-	Content  string
-	Channels []string
+	Channel string
+	Content string
 }
 
 type SendMessageResponse struct{}

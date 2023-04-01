@@ -9,9 +9,9 @@ import (
 )
 
 type config struct {
-	id       ID
-	content  string
-	channels map[channel.ID]struct{}
+	id      ID
+	content string
+	channel channel.ID
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time

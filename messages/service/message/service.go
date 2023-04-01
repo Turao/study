@@ -29,15 +29,9 @@ func NewService(
 
 // SendMessage implements v1.Messages
 func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest) (apiV1.SendMessageResponse, error) {
-	// todo: method-extract api-entity mapping
-	channels := make(map[channel.ID]struct{})
-	for _, channelID := range req.Channels {
-		channels[channel.ID(channelID)] = struct{}{}
-	}
-
 	cfg, errs := message.NewConfig(
+		message.WithChannel(channel.ID(req.Channel)),
 		message.WithContent(req.Content),
-		message.WithChannels(channels),
 	)
 	if len(errs) > 0 {
 		return apiV1.SendMessageResponse{}, errors.Join(errs...)

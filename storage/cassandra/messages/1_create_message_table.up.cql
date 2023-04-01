@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS messages.message (
   id UUID,
+  channel text,
   content text,
   tenancy text,
   created_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY(id)
+  PRIMARY KEY(id, channel)
 ) WITH cdc=true;

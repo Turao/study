@@ -15,8 +15,8 @@ func (id ID) String() string {
 
 type Message interface {
 	ID() ID
+	Channel() channel.ID
 	Content() string
-	Channels() map[channel.ID]struct{}
 
 	metadata.MultiTenant
 	metadata.Auditable
@@ -42,8 +42,8 @@ func (m message) Content() string {
 	return m.cfg.content
 }
 
-func (m message) Channels() map[channel.ID]struct{} {
-	return m.cfg.channels
+func (m message) Channel() channel.ID {
+	return m.cfg.channel
 }
 
 func (m message) Tenancy() metadata.Tenancy {

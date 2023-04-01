@@ -9,15 +9,10 @@ import (
 )
 
 func ToModel(message message.Message) (*Model, error) {
-	channels := make([]string, 0, len(message.Channels()))
-	for channelID := range message.Channels() {
-		channels = append(channels, channelID.String())
-	}
-
 	return &Model{
 		ID:        message.ID().String(),
+		Channel:   message.Channel().String(),
 		Content:   message.Content(),
-		Channels:  channels,
 		Tenancy:   message.Tenancy().String(),
 		CreatedAt: message.CreatedAt(),
 		DeletedAt: message.DeletedAt(),
@@ -25,15 +20,10 @@ func ToModel(message message.Message) (*Model, error) {
 }
 
 func ToEntity(model Model) (message.Message, error) {
-	channels := make(map[channel.ID]struct{})
-	for _, channelID := range model.Channels {
-		channels[channel.ID(channelID)] = struct{}{}
-	}
-
 	cfg, errs := message.NewConfig(
 		message.WithID(message.ID(model.ID)),
+		message.WithChannel(channel.ID(model.Channel)),
 		message.WithContent(model.Content),
-		message.WithChannels(channels),
 		message.WithTenancy(metadata.Tenancy(model.Tenancy)),
 		message.WithCreatedAt(model.CreatedAt),
 		message.WithDeletedAt(model.DeletedAt),

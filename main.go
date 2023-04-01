@@ -47,11 +47,7 @@ func messages() {
 		context.Background(),
 		messagessV1.SendMessageRequest{
 			Content: "this is my content",
-			Channels: []string{
-				"outages",
-				"elasticsearch-support",
-				"helpdesk-support",
-			},
+			Channel: "outages",
 		},
 	)
 	if err != nil {
