@@ -15,6 +15,7 @@ func (id ID) String() string {
 
 type Message interface {
 	ID() ID
+	Content() string
 	Channels() map[channel.ID]struct{}
 
 	metadata.MultiTenant
@@ -33,22 +34,26 @@ func NewMessage(cfg config) *message {
 	}
 }
 
-func (n message) ID() ID {
-	return n.cfg.id
+func (m message) ID() ID {
+	return m.cfg.id
 }
 
-func (n message) Channels() map[channel.ID]struct{} {
-	return n.cfg.channels
+func (m message) Content() string {
+	return m.cfg.content
 }
 
-func (n message) Tenancy() metadata.Tenancy {
-	return n.cfg.tenancy
+func (m message) Channels() map[channel.ID]struct{} {
+	return m.cfg.channels
 }
 
-func (n message) CreatedAt() time.Time {
-	return n.cfg.createdAt
+func (m message) Tenancy() metadata.Tenancy {
+	return m.cfg.tenancy
 }
 
-func (n message) DeletedAt() *time.Time {
-	return n.cfg.deletedAt
+func (m message) CreatedAt() time.Time {
+	return m.cfg.createdAt
+}
+
+func (m message) DeletedAt() *time.Time {
+	return m.cfg.deletedAt
 }

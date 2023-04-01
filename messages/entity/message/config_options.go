@@ -20,10 +20,20 @@ func WithID(id ID) ConfigOption {
 	}
 }
 
+func WithContent(content string) ConfigOption {
+	return func(cfg *config) error {
+		if content == "" {
+			return errors.New("empty content")
+		}
+		cfg.content = content
+		return nil
+	}
+}
+
 func WithChannels(channels map[channel.ID]struct{}) ConfigOption {
 	return func(cfg *config) error {
 		if len(channels) == 0 {
-			return errors.New("empty channel")
+			return errors.New("no channels")
 		}
 		cfg.channels = channels
 		return nil

@@ -8,14 +8,50 @@ import (
 
 	_ "github.com/lib/pq"
 
-	v1 "github.com/turao/topics/api/users/v1"
 	"github.com/turao/topics/config"
 
+	usersV1 "github.com/turao/topics/api/users/v1"
 	userRepository "github.com/turao/topics/users/repository/user"
 	userService "github.com/turao/topics/users/service/user"
+
+	messagessV1 "github.com/turao/topics/api/messages/v1"
+	messageRepository "github.com/turao/topics/messages/repository/message"
+	messageService "github.com/turao/topics/messages/service/message"
 )
 
 func main() {
+	// users()
+	messages()
+}
+
+func messages() {
+	messageRepo, err := messageRepository.NewRepository()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	messageSvc, err := messageService.NewService(messageRepo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = messageSvc.SendMessage(
+		context.Background(),
+		messagessV1.SendMessageRequest{
+			Content: "this is my content",
+			Channels: []string{
+				"outages",
+				"elasticsearch-support",
+				"helpdesk-support",
+			},
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func users() {
 	userscfg := config.Users{
 		DatabaseConfig: config.PostgresConfig{
 			Host:     "localhost",
@@ -61,7 +97,7 @@ func main() {
 	log.Println(userSvc)
 	_, err = userSvc.RegisterUser(
 		context.Background(),
-		v1.RegisteUserRequest{
+		usersV1.RegisteUserRequest{
 			Email:     "example@domain.com",
 			FirstName: "john",
 			LastName:  "cleese",
