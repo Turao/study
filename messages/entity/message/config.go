@@ -3,6 +3,7 @@ package message
 import (
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
 )
@@ -19,7 +20,7 @@ type config struct {
 
 func NewConfig(opts ...ConfigOption) (config, []error) {
 	cfg := config{
-		id:        ID("default"),
+		id:        ID(uuid.Must(uuid.NewV4()).String()),
 		tenancy:   metadata.TenancyTesting,
 		createdAt: time.Now(),
 	}

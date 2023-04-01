@@ -31,6 +31,7 @@ func ToEntity(model Model) (message.Message, error) {
 	}
 
 	cfg, errs := message.NewConfig(
+		message.WithID(message.ID(model.ID)),
 		message.WithContent(model.Content),
 		message.WithChannels(channels),
 		message.WithTenancy(metadata.Tenancy(model.Tenancy)),

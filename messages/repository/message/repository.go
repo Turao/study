@@ -2,22 +2,18 @@ package message
 
 import (
 	"context"
-	"encoding/json"
-	"log"
-	"sync"
 
+	"github.com/gocql/gocql"
 	"github.com/turao/topics/messages/entity/message"
 )
 
 type repository struct {
-	messages map[string]*Model
-	mutex    sync.RWMutex
+	database *gocql.Session
 }
 
-func NewRepository() (*repository, error) {
+func NewRepository(database *gocql.Session) (*repository, error) {
 	return &repository{
-		messages: make(map[string]*Model, 0),
-		mutex:    sync.RWMutex{},
+		database: database,
 	}, nil
 }
 
@@ -27,18 +23,17 @@ func (r *repository) Save(ctx context.Context, message message.Message) error {
 		return err
 	}
 
-	r.mutex.Lock()
-	r.messages[msg.ID] = msg
-	r.mutex.Unlock()
+	err = r.database.Query(
+		"INSERT INTO message (id, content, tenancy, created_at, deleted_at) VALUES (?, ?, ?, ?, ?)",
+		msg.ID,
+		msg.Content,
+		msg.Tenancy,
+		msg.CreatedAt,
+		msg.DeletedAt,
+	).WithContext(ctx).Exec()
+	if err != nil {
+		return err
+	}
 
-	r.printMessages()
 	return nil
-}
-
-func (r *repository) printMessages() {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
-
-	pretty, _ := json.MarshalIndent(r.messages, "", " ")
-	log.Println("message stored:", string(pretty))
 }

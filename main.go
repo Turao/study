@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gocql/gocql"
 	_ "github.com/lib/pq"
 
 	"github.com/turao/topics/config"
@@ -25,7 +26,14 @@ func main() {
 }
 
 func messages() {
-	messageRepo, err := messageRepository.NewRepository()
+	cluster := gocql.NewCluster("localhost:9042")
+	cluster.Keyspace = "messages"
+	session, err := cluster.CreateSession()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	messageRepo, err := messageRepository.NewRepository(session)
 	if err != nil {
 		log.Fatalln(err)
 	}

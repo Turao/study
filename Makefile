@@ -1,6 +1,7 @@
 # https://debezium.io/documentation/reference/2.1/tutorial.html
 STORAGE_DIR=${PWD}/storage
 STORAGE_USERS_DIR=${STORAGE_DIR}/postgres/users
+STORAGE_MESSAGES_DIR=${STORAGE_DIR}/cassandra/messages
 STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
 
 
@@ -18,6 +19,24 @@ migrate-down-storage-users:
 
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
+
+# Storage - Messages
+
+start-storage-messages:
+	docker run -it --rm --name storage-messages -p 9042:9042 cassandra
+
+shell-storage-messages:
+	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
+
+migrate-up-storage-messages:
+	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose up 1
+
+migrate-down-storage-messages:
+	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose down 1
+
+migrate-force-storage-messages:
+	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose force ${version}
+
 
 # Messaging
 start-zookeeper:
