@@ -5,6 +5,7 @@ import (
 
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
+	"github.com/turao/topics/users/entity/user"
 )
 
 type ID string
@@ -15,6 +16,7 @@ func (id ID) String() string {
 
 type Message interface {
 	ID() ID
+	Author() user.ID
 	Channel() channel.ID
 	Content() string
 
@@ -38,12 +40,16 @@ func (m message) ID() ID {
 	return m.cfg.id
 }
 
-func (m message) Content() string {
-	return m.cfg.content
+func (m message) Author() user.ID {
+	return m.cfg.author
 }
 
 func (m message) Channel() channel.ID {
 	return m.cfg.channel
+}
+
+func (m message) Content() string {
+	return m.cfg.content
 }
 
 func (m message) Tenancy() metadata.Tenancy {

@@ -4,6 +4,7 @@ import "time"
 
 type Model struct {
 	ID        string     `json:"id"`
+	Author    string     `json:"author"`
 	Channel   string     `json:"channel"`
 	Content   string     `json:"content"`
 	Tenancy   string     `json:"tenancy"`

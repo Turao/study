@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/gocql/gocql"
+	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 
 	"github.com/turao/topics/config"
@@ -46,6 +47,7 @@ func messages() {
 	_, err = messageSvc.SendMessage(
 		context.Background(),
 		messagessV1.SendMessageRequest{
+			Author:  uuid.Must(uuid.NewV4()).String(),
 			Content: "this is my content",
 			Channel: "outages",
 		},

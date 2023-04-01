@@ -7,6 +7,7 @@ type Messages interface {
 }
 
 type SendMessageRequest struct {
+	Author  string
 	Channel string
 	Content string
 }

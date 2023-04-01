@@ -6,6 +6,7 @@ import (
 
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
+	"github.com/turao/topics/users/entity/user"
 )
 
 type ConfigOption func(*config) error
@@ -16,6 +17,16 @@ func WithID(id ID) ConfigOption {
 			return errors.New("empty id")
 		}
 		cfg.id = id
+		return nil
+	}
+}
+
+func WithAuthor(author user.ID) ConfigOption {
+	return func(cfg *config) error {
+		if author == "" {
+			return errors.New("empty author")
+		}
+		cfg.author = author
 		return nil
 	}
 }

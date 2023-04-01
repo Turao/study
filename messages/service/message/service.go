@@ -7,6 +7,7 @@ import (
 	apiV1 "github.com/turao/topics/api/messages/v1"
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/messages/entity/message"
+	"github.com/turao/topics/users/entity/user"
 )
 
 type MessageRepository interface {
@@ -30,6 +31,7 @@ func NewService(
 // SendMessage implements v1.Messages
 func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest) (apiV1.SendMessageResponse, error) {
 	cfg, errs := message.NewConfig(
+		message.WithAuthor(user.ID(req.Author)),
 		message.WithChannel(channel.ID(req.Channel)),
 		message.WithContent(req.Content),
 	)

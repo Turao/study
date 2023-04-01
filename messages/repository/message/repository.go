@@ -24,8 +24,9 @@ func (r *repository) Save(ctx context.Context, message message.Message) error {
 	}
 
 	err = r.database.Query(
-		"INSERT INTO message (id, channel, content, tenancy, created_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?)",
+		"INSERT INTO message (id, author, channel, content, tenancy, created_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		msg.ID,
+		msg.Author,
 		msg.Channel,
 		msg.Content,
 		msg.Tenancy,
