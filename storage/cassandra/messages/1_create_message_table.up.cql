@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS messages.message (
   tenancy text,
   created_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY(id, author, channel)
+  PRIMARY KEY(id, channel)
 ) WITH cdc=true;
