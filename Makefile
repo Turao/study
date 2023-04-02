@@ -23,7 +23,9 @@ migrate-force-storage-users:
 # Storage - Messages
 
 start-storage-messages:
-	docker run -it --rm --name storage-messages -p 9042:9042 cassandra
+	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_MESSAGES_DIR}/cassandra.yaml
+	docker run --rm -v ${STORAGE_MESSAGES_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
+	docker run -it --rm --name storage-messages -v ${STORAGE_MESSAGES_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
 
 shell-storage-messages:
 	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
