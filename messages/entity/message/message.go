@@ -1,8 +1,10 @@
 package message
 
 import (
+	"errors"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/users/entity/user"
@@ -25,41 +27,62 @@ type Message interface {
 }
 
 type message struct {
-	cfg config
+	id      ID
+	author  user.ID
+	channel channel.ID
+	content string
+
+	tenancy   metadata.Tenancy
+	createdAt time.Time
+	deletedAt *time.Time
 }
 
 var _ Message = (*message)(nil)
 
-func NewMessage(cfg config) *message {
-	return &message{
-		cfg: cfg,
+func NewMessage(opts ...MessageOption) (*message, error) {
+	message := &message{
+		id:        ID(uuid.Must(uuid.NewV4()).String()),
+		tenancy:   metadata.TenancyTesting,
+		createdAt: time.Now(),
 	}
+
+	errs := make([]error, 0)
+	for _, opt := range opts {
+		if err := opt(message); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return message, nil
 }
 
 func (m message) ID() ID {
-	return m.cfg.id
+	return m.id
 }
 
 func (m message) Author() user.ID {
-	return m.cfg.author
+	return m.author
 }
 
 func (m message) Channel() channel.ID {
-	return m.cfg.channel
+	return m.channel
 }
 
 func (m message) Content() string {
-	return m.cfg.content
+	return m.content
 }
 
 func (m message) Tenancy() metadata.Tenancy {
-	return m.cfg.tenancy
+	return m.tenancy
 }
 
 func (m message) CreatedAt() time.Time {
-	return m.cfg.createdAt
+	return m.createdAt
 }
 
 func (m message) DeletedAt() *time.Time {
-	return m.cfg.deletedAt
+	return m.deletedAt
 }

@@ -2,7 +2,6 @@ package message
 
 import (
 	"context"
-	"errors"
 
 	apiV1 "github.com/turao/topics/api/messages/v1"
 	"github.com/turao/topics/channels/entity/channel"
@@ -30,16 +29,16 @@ func NewService(
 
 // SendMessage implements v1.Messages
 func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest) (apiV1.SendMessageResponse, error) {
-	cfg, errs := message.NewConfig(
+	msg, err := message.NewMessage(
 		message.WithAuthor(user.ID(req.Author)),
 		message.WithChannel(channel.ID(req.Channel)),
 		message.WithContent(req.Content),
 	)
-	if len(errs) > 0 {
-		return apiV1.SendMessageResponse{}, errors.Join(errs...)
+	if err != nil {
+		return apiV1.SendMessageResponse{}, err
 	}
-	msg := message.NewMessage(cfg)
-	err := svc.messageRepository.Save(ctx, msg)
+
+	err = svc.messageRepository.Save(ctx, msg)
 	if err != nil {
 		return apiV1.SendMessageResponse{}, err
 	}
