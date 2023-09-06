@@ -7,9 +7,9 @@ type Messages interface {
 }
 
 type SendMessageRequest struct {
-	Author  string
-	Channel string
-	Content string
+	AuthorID  string `json:"authorId"`
+	ChannelID string `json:"channelId"`
+	Content   string `json:"content"`
 }
 
 type SendMessageResponse struct{}

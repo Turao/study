@@ -47,9 +47,9 @@ func messages() {
 	_, err = messageSvc.SendMessage(
 		context.Background(),
 		messagessV1.SendMessageRequest{
-			Author:  uuid.Must(uuid.NewV4()).String(),
-			Content: "this is my content",
-			Channel: "outages",
+			AuthorID:  uuid.Must(uuid.NewV4()).String(),
+			Content:   "this is my content",
+			ChannelID: "outages",
 		},
 	)
 	if err != nil {

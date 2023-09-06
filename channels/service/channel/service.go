@@ -37,6 +37,6 @@ func (*service) DeleteChannel(ctx context.Context, req apiV1.DeleteChannelReques
 }
 
 // GetChannel implements v1.Channels
-func (*service) GetChannel(ctx context.Context, req apiV1.GetChannelRequest) (apiV1.GetChannelResponse, error) {
+func (*service) GetChannelInfo(ctx context.Context, req apiV1.GetChannelInfoRequest) (apiV1.GetChannelInfoResponse, error) {
 	panic("unimplemented")
 }

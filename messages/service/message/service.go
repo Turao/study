@@ -30,8 +30,8 @@ func NewService(
 // SendMessage implements v1.Messages
 func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest) (apiV1.SendMessageResponse, error) {
 	msg, err := message.NewMessage(
-		message.WithAuthor(user.ID(req.Author)),
-		message.WithChannel(channel.ID(req.Channel)),
+		message.WithAuthor(user.ID(req.AuthorID)),
+		message.WithChannel(channel.ID(req.ChannelID)),
 		message.WithContent(req.Content),
 	)
 	if err != nil {
