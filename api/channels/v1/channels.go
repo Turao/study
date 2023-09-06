@@ -22,9 +22,11 @@ type DeleteChannelRequest struct {
 type DeleteChannelResponse struct{}
 
 type GetChannelInfoRequest struct {
+	ID string `json:"id"`
+}
+
+type GetChannelInfoResponse struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Tenancy string `json:"tenancy"`
 }
-
-type GetChannelInfoResponse struct{}

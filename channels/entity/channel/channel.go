@@ -15,13 +15,15 @@ func (id ID) String() string {
 
 type Channel interface {
 	ID() ID
+	Name() string
 
 	metadata.MultiTenant
 	metadata.Auditable
 }
 
 type channel struct {
-	id ID
+	id   ID
+	name string
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time
@@ -33,6 +35,7 @@ var _ Channel = (*channel)(nil)
 func NewChannel(opts ...ChannelOption) (*channel, error) {
 	channel := &channel{
 		id:        ID("default"),
+		name:      "",
 		tenancy:   metadata.TenancyTesting,
 		createdAt: time.Now(),
 	}
@@ -50,18 +53,22 @@ func NewChannel(opts ...ChannelOption) (*channel, error) {
 	return channel, nil
 }
 
-func (n channel) ID() ID {
-	return n.id
+func (ch channel) ID() ID {
+	return ch.id
 }
 
-func (n channel) Tenancy() metadata.Tenancy {
-	return n.tenancy
+func (ch channel) Name() string {
+	return ch.name
 }
 
-func (n channel) CreatedAt() time.Time {
-	return n.createdAt
+func (ch channel) Tenancy() metadata.Tenancy {
+	return ch.tenancy
 }
 
-func (n channel) DeletedAt() *time.Time {
-	return n.deletedAt
+func (ch channel) CreatedAt() time.Time {
+	return ch.createdAt
+}
+
+func (ch channel) DeletedAt() *time.Time {
+	return ch.deletedAt
 }

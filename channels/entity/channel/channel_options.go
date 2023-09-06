@@ -19,6 +19,16 @@ func WithID(id ID) ChannelOption {
 	}
 }
 
+func WithName(name string) ChannelOption {
+	return func(ch *channel) error {
+		if name == "" {
+			return errors.New("empty name")
+		}
+		ch.name = name
+		return nil
+	}
+}
+
 func WithTenancy(tenancy metadata.Tenancy) ChannelOption {
 	return func(ch *channel) error {
 		if tenancy != metadata.TenancyTesting && tenancy != metadata.TenancyProduction {
