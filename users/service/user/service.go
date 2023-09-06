@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	apiV1 "github.com/turao/topics/api/users/v1"
@@ -32,18 +31,17 @@ func NewService(
 // RegisterUser implements apiV1.Users
 func (svc *service) RegisterUser(ctx context.Context, req apiV1.RegisteUserRequest) (apiV1.RegisterUserResponse, error) {
 	log.Println("registering user", req)
-	usercfg, errs := user.NewConfig(
+	user, err := user.NewUser(
 		user.WithEmail(req.Email),
 		user.WithFirstName(req.FirstName),
 		user.WithLastName(req.LastName),
 		user.WithTenancy(metadata.Tenancy(req.Tenancy)),
 	)
-	if len(errs) > 0 {
-		return apiV1.RegisterUserResponse{}, errors.Join(errs...)
+	if err != nil {
+		return apiV1.RegisterUserResponse{}, err
 	}
 
-	user := user.NewUser(usercfg)
-	err := svc.userRepository.Save(ctx, user)
+	err = svc.userRepository.Save(ctx, user)
 	if err != nil {
 		return apiV1.RegisterUserResponse{}, err
 	}

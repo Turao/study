@@ -14,75 +14,75 @@ func isAlpha(str string) bool {
 	return alpha.MatchString(str)
 }
 
-type ConfigOption func(*config) error
+type UserOption func(*user) error
 
-func WithID(id ID) ConfigOption {
-	return func(cfg *config) error {
+func WithID(id ID) UserOption {
+	return func(u *user) error {
 		if id == "" {
 			return errors.New("empty id")
 		}
-		cfg.id = id
+		u.id = id
 		return nil
 	}
 }
 
-func WithEmail(email string) ConfigOption {
-	return func(cfg *config) error {
+func WithEmail(email string) UserOption {
+	return func(u *user) error {
 		if email == "" {
 			return errors.New("empty email")
 		}
-		cfg.email = email
+		u.email = email
 		return nil
 	}
 }
 
-func WithFirstName(firstName string) ConfigOption {
-	return func(cfg *config) error {
+func WithFirstName(firstName string) UserOption {
+	return func(u *user) error {
 		if !isAlpha(firstName) {
 			return errors.New("invalid first name")
 		}
-		cfg.firstName = firstName
+		u.firstName = firstName
 		return nil
 	}
 }
 
-func WithLastName(lastName string) ConfigOption {
-	return func(cfg *config) error {
+func WithLastName(lastName string) UserOption {
+	return func(u *user) error {
 		if !isAlpha(lastName) {
 			return errors.New("invalid last name")
 		}
-		cfg.lastName = lastName
+		u.lastName = lastName
 		return nil
 	}
 }
 
-func WithTenancy(tenancy metadata.Tenancy) ConfigOption {
-	return func(cfg *config) error {
+func WithTenancy(tenancy metadata.Tenancy) UserOption {
+	return func(u *user) error {
 		if tenancy != metadata.TenancyTesting && tenancy != metadata.TenancyProduction {
 			return errors.New("invalid tenancy")
 		}
-		cfg.tenancy = tenancy
+		u.tenancy = tenancy
 		return nil
 	}
 }
 
-func WithCreatedAt(createdAt time.Time) ConfigOption {
-	return func(cfg *config) error {
+func WithCreatedAt(createdAt time.Time) UserOption {
+	return func(u *user) error {
 		if createdAt.After(time.Now()) {
 			return errors.New("createdAt date cannot be in the future")
 		}
-		cfg.createdAt = createdAt
+		u.createdAt = createdAt
 		return nil
 	}
 }
 
-func WithDeletedAt(deletedAt *time.Time) ConfigOption {
-	return func(cfg *config) error {
-		if deletedAt != nil && deletedAt.Before(cfg.createdAt) {
+func WithDeletedAt(deletedAt *time.Time) UserOption {
+	return func(u *user) error {
+		if deletedAt != nil && deletedAt.Before(u.createdAt) {
 			return errors.New("deletedAt date cannot be before createdAt")
 		}
 
-		cfg.deletedAt = deletedAt
+		u.deletedAt = deletedAt
 		return nil
 	}
 }

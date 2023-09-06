@@ -1,8 +1,10 @@
 package user
 
 import (
+	"errors"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/topics/metadata"
 )
 
@@ -26,48 +28,70 @@ type User interface {
 }
 
 type user struct {
-	cfg config
+	id ID
+
+	email     string
+	firstName string
+	lastName  string
+
+	tenancy   metadata.Tenancy
+	createdAt time.Time
+	deletedAt *time.Time
 }
 
 var _ User = (*user)(nil)
 
-func NewUser(cfg config) *user {
-	return &user{
-		cfg: cfg,
+func NewUser(opts ...UserOption) (*user, error) {
+	user := &user{
+		id:        ID(uuid.Must(uuid.NewV4()).String()),
+		tenancy:   metadata.TenancyTesting,
+		createdAt: time.Now(),
 	}
+
+	errs := make([]error, 0)
+	for _, opt := range opts {
+		if err := opt(user); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return user, nil
 }
 
 func (u *user) ID() ID {
-	return u.cfg.id
+	return u.id
 }
 
 func (u *user) FirstName() string {
-	return u.cfg.firstName
+	return u.firstName
 }
 
 func (u *user) LastName() string {
-	return u.cfg.lastName
+	return u.lastName
 }
 
 func (u *user) Email() string {
-	return u.cfg.email
+	return u.email
 }
 
 func (u *user) Tenancy() metadata.Tenancy {
-	return u.cfg.tenancy
+	return u.tenancy
 }
 
 func (u *user) CreatedAt() time.Time {
-	return u.cfg.createdAt
+	return u.createdAt
 }
 
 func (u *user) DeletedAt() *time.Time {
-	return u.cfg.deletedAt
+	return u.deletedAt
 }
 
 func (u *user) Delete() {
 	if u.DeletedAt() == nil {
 		now := time.Now()
-		u.cfg.deletedAt = &now
+		u.deletedAt = &now
 	}
 }
