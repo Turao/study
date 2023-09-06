@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"errors"
 	"time"
 
 	"github.com/turao/topics/metadata"
@@ -20,29 +21,47 @@ type Channel interface {
 }
 
 type channel struct {
-	cfg config
+	id ID
+
+	tenancy   metadata.Tenancy
+	createdAt time.Time
+	deletedAt *time.Time
 }
 
 var _ Channel = (*channel)(nil)
 
-func NewChannel(cfg config) *channel {
-	return &channel{
-		cfg: cfg,
+func NewChannel(opts ...ChannelOption) (*channel, error) {
+	channel := &channel{
+		id:        ID("default"),
+		tenancy:   metadata.TenancyTesting,
+		createdAt: time.Now(),
 	}
+
+	errs := make([]error, 0)
+	for _, opt := range opts {
+		if err := opt(channel); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return nil, errors.Join(errs...)
+	}
+
+	return channel, nil
 }
 
 func (n channel) ID() ID {
-	return n.cfg.id
+	return n.id
 }
 
 func (n channel) Tenancy() metadata.Tenancy {
-	return n.cfg.tenancy
+	return n.tenancy
 }
 
 func (n channel) CreatedAt() time.Time {
-	return n.cfg.createdAt
+	return n.createdAt
 }
 
 func (n channel) DeletedAt() *time.Time {
-	return n.cfg.deletedAt
+	return n.deletedAt
 }
