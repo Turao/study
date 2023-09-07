@@ -27,7 +27,8 @@ import (
 
 func main() {
 	// users()
-	messages()
+	// messages()
+	channels()
 }
 
 func messages() {
@@ -138,7 +139,10 @@ func channels() {
 
 	_, err = service.CreateChannel(
 		context.Background(),
-		v1.CreateChannelRequest{},
+		v1.CreateChannelRequest{
+			Name:    "tech-support",
+			Tenancy: "tenancy/test",
+		},
 	)
 	if err != nil {
 		log.Fatalln(err)

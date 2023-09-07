@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/turao/topics/metadata"
 )
 
@@ -34,7 +35,7 @@ var _ Channel = (*channel)(nil)
 
 func NewChannel(opts ...ChannelOption) (*channel, error) {
 	channel := &channel{
-		id:        ID("default"),
+		id:        ID(uuid.Must(uuid.NewV4()).String()),
 		name:      "",
 		tenancy:   metadata.TenancyTesting,
 		createdAt: time.Now(),
