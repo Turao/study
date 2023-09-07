@@ -6,5 +6,7 @@ CREATE TABLE IF NOT EXISTS messages.message (
   tenancy text,
   created_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY(id, channel)
-) WITH cdc=true;
+  PRIMARY KEY((channel), created_at)
+)
+WITH CLUSTERING ORDER BY (created_at DESC)
+AND cdc=true;

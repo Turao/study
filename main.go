@@ -27,8 +27,8 @@ import (
 
 func main() {
 	// users()
-	// messages()
-	channels()
+	messages()
+	// channels()
 }
 
 func messages() {
