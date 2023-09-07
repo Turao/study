@@ -12,13 +12,17 @@ import (
 
 	"github.com/turao/topics/config"
 
+	v1 "github.com/turao/topics/api/channels/v1"
 	usersV1 "github.com/turao/topics/api/users/v1"
-	userRepository "github.com/turao/topics/users/repository/user"
-	userService "github.com/turao/topics/users/service/user"
+	userrepository "github.com/turao/topics/users/repository/user"
+	userservice "github.com/turao/topics/users/service/user"
 
-	messagessV1 "github.com/turao/topics/api/messages/v1"
-	messageRepository "github.com/turao/topics/messages/repository/message"
-	messageService "github.com/turao/topics/messages/service/message"
+	messagesV1 "github.com/turao/topics/api/messages/v1"
+	messagerepository "github.com/turao/topics/messages/repository/message"
+	messageservice "github.com/turao/topics/messages/service/message"
+
+	channelrepository "github.com/turao/topics/channels/repository/channel"
+	channelservice "github.com/turao/topics/channels/service/channel"
 )
 
 func main() {
@@ -34,19 +38,19 @@ func messages() {
 		log.Fatalln(err)
 	}
 
-	messageRepo, err := messageRepository.NewRepository(session)
+	repository, err := messagerepository.NewRepository(session)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	messageSvc, err := messageService.NewService(messageRepo)
+	service, err := messageservice.NewService(repository)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	_, err = messageSvc.SendMessage(
+	_, err = service.SendMessage(
 		context.Background(),
-		messagessV1.SendMessageRequest{
+		messagesV1.SendMessageRequest{
 			AuthorID:  uuid.Must(uuid.NewV4()).String(),
 			Content:   "this is my content",
 			ChannelID: "outages",
@@ -90,18 +94,17 @@ func users() {
 		log.Fatalln(err)
 	}
 
-	userRepo, err := userRepository.NewRepository(database)
+	repository, err := userrepository.NewRepository(database)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userSvc, err := userService.NewService(userRepo)
+	service, err := userservice.NewService(repository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(userSvc)
-	_, err = userSvc.RegisterUser(
+	_, err = service.RegisterUser(
 		context.Background(),
 		usersV1.RegisteUserRequest{
 			Email:     "example@domain.com",
@@ -109,6 +112,33 @@ func users() {
 			LastName:  "cleese",
 			Tenancy:   "tenancy/test",
 		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func channels() {
+	cluster := gocql.NewCluster("localhost:9042")
+	cluster.Keyspace = "channels"
+	session, err := cluster.CreateSession()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	repository, err := channelrepository.NewRepository(session)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	service, err := channelservice.NewService(repository)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.CreateChannel(
+		context.Background(),
+		v1.CreateChannelRequest{},
 	)
 	if err != nil {
 		log.Fatalln(err)

@@ -17,6 +17,10 @@ func NewRepository(database *gocql.Session) (*repository, error) {
 	}, nil
 }
 
+func (r *repository) FindByID(ctx context.Context, id channel.ID) (channel.Channel, error) {
+	panic("not implemented yet")
+}
+
 func (r *repository) Save(ctx context.Context, channel channel.Channel) error {
 	ch, err := ToModel(channel)
 	if err != nil {
