@@ -1,8 +1,12 @@
 # https://debezium.io/documentation/reference/2.1/tutorial.html
 STORAGE_DIR=${PWD}/storage
-STORAGE_USERS_DIR=${STORAGE_DIR}/postgres/users
-STORAGE_MESSAGES_DIR=${STORAGE_DIR}/cassandra/messages
+STORAGE_POSTGRES_DIR=${STORAGE_DIR}/postgres
+STORAGE_CASSANDRA_DIR=${STORAGE_DIR}/cassandra
 STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
+
+STORAGE_USERS_DIR=${STORAGE_POSTGRES_DIR}/users
+STORAGE_MESSAGES_DIR=${STORAGE_CASSANDRA_DIR}/messages
+STORAGE_CHANNELS_DIR=${STORAGE_CASSANDRA_DIR}/channels
 
 
 # Storage - Users
@@ -20,12 +24,30 @@ migrate-down-storage-users:
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
 
-# Storage - Messages
+# Storage - Channels
+start-storage-channels:
+	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_CASSANDRA_DIR}/cassandra.yaml
+	docker run --rm -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
+	docker run -it --rm --name storage-channels -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
 
+shell-storage-channels:
+	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
+
+migrate-up-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose up 1
+
+migrate-down-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose down 1
+
+migrate-force-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose force ${version}
+
+
+# Storage - Messages
 start-storage-messages:
-	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_MESSAGES_DIR}/cassandra.yaml
-	docker run --rm -v ${STORAGE_MESSAGES_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
-	docker run -it --rm --name storage-messages -v ${STORAGE_MESSAGES_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
+	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_CASSANDRA_DIR}/cassandra.yaml
+	docker run --rm -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
+	docker run -it --rm --name storage-messages -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
 
 shell-storage-messages:
 	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
