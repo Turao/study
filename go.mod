@@ -8,6 +8,9 @@ require (
 	github.com/gocql/gocql v1.6.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/lib/pq v1.10.7
+	github.com/scylladb/gocqlx/v2 v2.8.0
+	google.golang.org/grpc v1.58.0
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
@@ -19,6 +22,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
@@ -37,11 +41,13 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/scylladb/go-reflectx v1.0.1 // indirect
-	github.com/scylladb/gocqlx/v2 v2.8.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/github.com/Shopify/sarama/otelsarama v0.31.0 // indirect
 	go.opentelemetry.io/otel v1.6.1 // indirect
 	go.opentelemetry.io/otel/trace v1.6.1 // indirect
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )

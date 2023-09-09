@@ -1,5 +1,11 @@
 package config
 
+type CassandraConfig struct {
+	Host     string
+	Port     int
+	Keyspace string
+}
+
 type PostgresConfig struct {
 	Host     string
 	Port     int

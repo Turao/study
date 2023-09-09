@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/gocql/gocql"
-	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/scylladb/gocqlx/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/turao/topics/config"
 
@@ -19,9 +20,10 @@ import (
 	userrepository "github.com/turao/topics/users/repository/user"
 	userservice "github.com/turao/topics/users/service/user"
 
-	messagesV1 "github.com/turao/topics/api/messages/v1"
 	messagerepository "github.com/turao/topics/messages/repository/message"
+	messagesserver "github.com/turao/topics/messages/server"
 	messageservice "github.com/turao/topics/messages/service/message"
+	messagespb "github.com/turao/topics/proto/messages"
 
 	channelrepository "github.com/turao/topics/channels/repository/channel"
 	channelservice "github.com/turao/topics/channels/service/channel"
@@ -34,8 +36,14 @@ func main() {
 }
 
 func messages() {
-	cluster := gocql.NewCluster("localhost:9042")
-	cluster.Keyspace = "messages"
+	cfg := config.CassandraConfig{
+		Host:     "localhost",
+		Port:     9042,
+		Keyspace: "messages",
+	}
+
+	cluster := gocql.NewCluster(fmt.Sprintf("%s:%v", cfg.Host, cfg.Port))
+	cluster.Keyspace = cfg.Keyspace
 	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
 		log.Fatalln(err)
@@ -51,34 +59,22 @@ func messages() {
 		log.Fatalln(err)
 	}
 
-	_, err = service.SendMessage(
-		context.Background(),
-		messagesV1.SendMessageRequest{
-			AuthorID:  uuid.Must(uuid.NewV4()).String(),
-			Content:   "this is my content",
-			ChannelID: "outages",
-		},
-	)
+	registrar := grpc.NewServer()
+	server, err := messagesserver.NewServer(service)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	messagespb.RegisterMessagesServer(registrar, server)
+	reflection.Register(registrar)
+
+	listener, err := net.Listen("tcp", "localhost:8001")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	res, err := service.GetMessages(
-		context.Background(),
-		messagesV1.GetMessagesRequest{
-			ChannelID: "outages",
-		},
-	)
-	if err != nil {
+	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)
 	}
-
-	encoded, err := json.MarshalIndent(res, "", " ")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println(string(encoded))
 }
 
 func users() {
@@ -139,8 +135,14 @@ func users() {
 }
 
 func channels() {
-	cluster := gocql.NewCluster("localhost:9042")
-	cluster.Keyspace = "channels"
+	cfg := config.CassandraConfig{
+		Host:     "localhost",
+		Port:     9042,
+		Keyspace: "channels",
+	}
+
+	cluster := gocql.NewCluster(fmt.Sprintf("%s:%v", cfg.Host, cfg.Port))
+	cluster.Keyspace = cfg.Keyspace
 	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
 		log.Fatalln(err)

@@ -74,3 +74,8 @@ start-kafka-connect:
 
 register-storage-connectors:
 	curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '@${STORAGE_CONNECTORS_DIR}/users.json'
+
+
+# GRPC / Protobuf
+proto-messages:
+	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/messages/v1.proto

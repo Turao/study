@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "github.com/turao/topics/proto/messages";
+
+import "google/protobuf/timestamp.proto";
+
+service Messages {
+    rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {}
+    rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse) {}
+}
+
+message SendMessageRequest {
+    string autor_id = 1;
+    string channel_id = 2;
+    string content = 3;
+}
+
+message SendMessageResponse {}
+
+message GetMessagesRequest {
+    string channel_id = 1;
+}
+
+message GetMessagesResponse {
+    repeated MessageInfo messages = 1;
+}
+
+message MessageInfo {
+    string id = 1;
+    string author_id = 2;
+    string content = 3;
+    string tenancy = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp deleted_at = 6;
+}
