@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -28,14 +29,14 @@ import (
 
 func main() {
 	// users()
-	// messages()
-	channels()
+	messages()
+	// channels()
 }
 
 func messages() {
 	cluster := gocql.NewCluster("localhost:9042")
 	cluster.Keyspace = "messages"
-	session, err := cluster.CreateSession()
+	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -61,6 +62,23 @@ func messages() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	res, err := service.GetMessages(
+		context.Background(),
+		messagesV1.GetMessagesRequest{
+			ChannelID: "outages",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	encoded, err := json.MarshalIndent(res, "", " ")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println(string(encoded))
 }
 
 func users() {

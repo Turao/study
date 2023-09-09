@@ -11,6 +11,7 @@ import (
 
 type MessageRepository interface {
 	Save(ctx context.Context, message message.Message) error
+	ListAllByChannelID(ctx context.Context, channelID channel.ID) ([]message.Message, error)
 }
 
 type service struct {
@@ -44,4 +45,30 @@ func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest
 	}
 
 	return apiV1.SendMessageResponse{}, nil
+}
+
+func (svc service) GetMessages(ctx context.Context, req apiV1.GetMessagesRequest) (apiV1.GetMessagesResponse, error) {
+	messages, err := svc.messageRepository.ListAllByChannelID(ctx, channel.ID(req.ChannelID))
+	if err != nil {
+		return apiV1.GetMessagesResponse{}, err
+	}
+
+	msgs := []apiV1.MessageInfo{}
+	for _, message := range messages {
+		msgs = append(
+			msgs,
+			apiV1.MessageInfo{
+				ID:        message.ID().String(),
+				Author:    message.Author().String(),
+				Content:   message.Content(),
+				Tenancy:   message.Tenancy().String(),
+				CreatedAt: message.CreatedAt(),
+				DeletedAt: message.DeletedAt(),
+			},
+		)
+	}
+
+	return apiV1.GetMessagesResponse{
+		Messages: msgs,
+	}, nil
 }
