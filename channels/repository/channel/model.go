@@ -1,6 +1,28 @@
 package channel
 
-import "time"
+import (
+	"time"
+
+	"github.com/scylladb/gocqlx/v2/table"
+)
+
+var _table = table.New(table.Metadata{
+	Name: "channel",
+	Columns: []string{
+		"id",
+		"name",
+		"tenancy",
+		"created_at",
+		"deleted_at",
+	},
+	PartKey: []string{
+		"id",
+	},
+	SortKey: []string{
+		"tenancy",
+		"created_at",
+	},
+})
 
 type Model struct {
 	ID        string     `json:"id"`

@@ -1,6 +1,9 @@
 package v1
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type Users interface {
 	RegisterUser(ctx context.Context, req RegisteUserRequest) (RegisterUserResponse, error)
@@ -30,9 +33,11 @@ type GetUserInfoRequest struct {
 }
 
 type GetUserInfoResponse struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Tenancy   string `json:"tenancy"`
+	ID        string     `json:"id"`
+	Email     string     `json:"email"`
+	FirstName string     `json:"firstName"`
+	LastName  string     `json:"lastName"`
+	Tenancy   string     `json:"tenancy"`
+	CreatedAt time.Time  `json:"createdAt"`
+	DeletedAt *time.Time `json:"deletedAt"`
 }

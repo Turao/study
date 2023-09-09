@@ -20,6 +20,8 @@ type Channel interface {
 
 	metadata.MultiTenant
 	metadata.Auditable
+
+	Delete() Channel
 }
 
 type channel struct {
@@ -72,4 +74,10 @@ func (ch channel) CreatedAt() time.Time {
 
 func (ch channel) DeletedAt() *time.Time {
 	return ch.deletedAt
+}
+
+func (ch channel) Delete() Channel {
+	now := time.Now()
+	ch.deletedAt = &now
+	return ch
 }

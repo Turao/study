@@ -1,6 +1,9 @@
 package v1
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type Channels interface {
 	CreateChannel(ctx context.Context, req CreateChannelRequest) (CreateChannelResponse, error)
@@ -26,7 +29,9 @@ type GetChannelInfoRequest struct {
 }
 
 type GetChannelInfoResponse struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Tenancy string `json:"tenancy"`
+	ID        string     `json:"id"`
+	Name      string     `json:"name"`
+	Tenancy   string     `json:"tenancy"`
+	CreatedAt time.Time  `json:"createdAt"`
+	DeletedAt *time.Time `json:"deletedAt"`
 }

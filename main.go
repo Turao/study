@@ -9,6 +9,7 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
+	"github.com/scylladb/gocqlx/v2"
 
 	"github.com/turao/topics/config"
 
@@ -27,8 +28,8 @@ import (
 
 func main() {
 	// users()
-	messages()
-	// channels()
+	// messages()
+	channels()
 }
 
 func messages() {
@@ -122,7 +123,7 @@ func users() {
 func channels() {
 	cluster := gocql.NewCluster("localhost:9042")
 	cluster.Keyspace = "channels"
-	session, err := cluster.CreateSession()
+	session, err := gocqlx.WrapSession(cluster.CreateSession())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -142,6 +143,16 @@ func channels() {
 		v1.CreateChannelRequest{
 			Name:    "tech-support",
 			Tenancy: "tenancy/test",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.DeleteChannel(
+		context.Background(),
+		v1.DeleteChannelRequest{
+			ID: "969388f9-6199-402d-b550-55e87013f85a",
 		},
 	)
 	if err != nil {

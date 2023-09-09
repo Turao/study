@@ -47,10 +47,32 @@ func (svc service) CreateChannel(ctx context.Context, req apiV1.CreateChannelReq
 
 // DeleteChannel implements v1.Channels
 func (svc service) DeleteChannel(ctx context.Context, req apiV1.DeleteChannelRequest) (apiV1.DeleteChannelResponse, error) {
-	panic("unimplemented")
+	ch, err := svc.channelRepository.FindByID(ctx, channel.ID(req.ID))
+	if err != nil {
+		return apiV1.DeleteChannelResponse{}, err
+	}
+
+	ch = ch.Delete()
+	err = svc.channelRepository.Save(ctx, ch)
+	if err != nil {
+		return apiV1.DeleteChannelResponse{}, err
+	}
+
+	return apiV1.DeleteChannelResponse{}, nil
 }
 
 // GetChannel implements v1.Channels
 func (svc service) GetChannelInfo(ctx context.Context, req apiV1.GetChannelInfoRequest) (apiV1.GetChannelInfoResponse, error) {
-	panic("unimplemented")
+	ch, err := svc.channelRepository.FindByID(ctx, channel.ID(req.ID))
+	if err != nil {
+		return apiV1.GetChannelInfoResponse{}, err
+	}
+
+	return apiV1.GetChannelInfoResponse{
+		ID:        ch.ID().String(),
+		Name:      ch.Name(),
+		Tenancy:   ch.Tenancy().String(),
+		CreatedAt: ch.CreatedAt(),
+		DeletedAt: ch.DeletedAt(),
+	}, nil
 }
