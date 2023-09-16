@@ -50,3 +50,35 @@ func (r *repository) ListAllByChannelID(ctx context.Context, channelID channel.I
 
 	return messages, nil
 }
+
+func (r *repository) StreamAllByChannelID(ctx context.Context, channelID channel.ID) (<-chan message.Message, <-chan error) {
+	messages := make(chan message.Message)
+	errs := make(chan error)
+
+	go func() {
+		defer close(messages)
+		defer close(errs)
+
+		iter := r.database.Query(_table.SelectAll()).WithContext(ctx).Iter()
+		defer func() {
+			err := iter.Close()
+			if err != nil {
+				errs <- err
+				return
+			}
+		}()
+
+		var model Model
+		for iter.StructScan(&model) {
+			msg, err := ToEntity(model)
+			if err != nil {
+				errs <- err
+				return
+			}
+
+			messages <- msg
+		}
+	}()
+
+	return messages, errs
+}

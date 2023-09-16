@@ -8,6 +8,7 @@ import (
 type Messages interface {
 	SendMessage(ctx context.Context, req SendMessageRequest) (SendMessageResponse, error)
 	GetMessages(ctx context.Context, req GetMessagesRequest) (GetMessagesResponse, error)
+	GetMessageStream(ctx context.Context, req GetMessageStreamRequest) (GetMessageStreamResponse, error)
 }
 
 type SendMessageRequest struct {
@@ -25,6 +26,14 @@ type GetMessagesRequest struct {
 
 type GetMessagesResponse struct {
 	Messages []MessageInfo `json:"messages"`
+}
+
+type GetMessageStreamRequest struct {
+	ChannelID string `json:"channelId"`
+}
+
+type GetMessageStreamResponse struct {
+	Messages <-chan MessageInfo `json:"messages"`
 }
 
 type MessageInfo struct {

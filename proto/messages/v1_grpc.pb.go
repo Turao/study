@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MessagesClient interface {
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
 	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error)
+	StreamMessages(ctx context.Context, in *StreamMessagesRequest, opts ...grpc.CallOption) (Messages_StreamMessagesClient, error)
 }
 
 type messagesClient struct {
@@ -52,12 +53,45 @@ func (c *messagesClient) GetMessages(ctx context.Context, in *GetMessagesRequest
 	return out, nil
 }
 
+func (c *messagesClient) StreamMessages(ctx context.Context, in *StreamMessagesRequest, opts ...grpc.CallOption) (Messages_StreamMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Messages_ServiceDesc.Streams[0], "/Messages/StreamMessages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &messagesStreamMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Messages_StreamMessagesClient interface {
+	Recv() (*StreamMessagesResponse, error)
+	grpc.ClientStream
+}
+
+type messagesStreamMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *messagesStreamMessagesClient) Recv() (*StreamMessagesResponse, error) {
+	m := new(StreamMessagesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // MessagesServer is the server API for Messages service.
 // All implementations must embed UnimplementedMessagesServer
 // for forward compatibility
 type MessagesServer interface {
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
 	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error)
+	StreamMessages(*StreamMessagesRequest, Messages_StreamMessagesServer) error
 	mustEmbedUnimplementedMessagesServer()
 }
 
@@ -70,6 +104,9 @@ func (UnimplementedMessagesServer) SendMessage(context.Context, *SendMessageRequ
 }
 func (UnimplementedMessagesServer) GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
+func (UnimplementedMessagesServer) StreamMessages(*StreamMessagesRequest, Messages_StreamMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamMessages not implemented")
 }
 func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
 
@@ -120,6 +157,27 @@ func _Messages_GetMessages_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_StreamMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamMessagesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MessagesServer).StreamMessages(m, &messagesStreamMessagesServer{stream})
+}
+
+type Messages_StreamMessagesServer interface {
+	Send(*StreamMessagesResponse) error
+	grpc.ServerStream
+}
+
+type messagesStreamMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *messagesStreamMessagesServer) Send(m *StreamMessagesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Messages_ServiceDesc is the grpc.ServiceDesc for Messages service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -136,6 +194,12 @@ var Messages_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Messages_GetMessages_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamMessages",
+			Handler:       _Messages_StreamMessages_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto/messages/v1.proto",
 }

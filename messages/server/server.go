@@ -66,3 +66,36 @@ func (s *server) SendMessage(ctx context.Context, req *proto.SendMessageRequest)
 
 	return &proto.SendMessageResponse{}, nil
 }
+
+// StreamMessages implements messages.MessagesServer.
+func (s *server) StreamMessages(req *proto.StreamMessagesRequest, stream proto.Messages_StreamMessagesServer) error {
+	res, err := s.service.GetMessageStream(stream.Context(), apiV1.GetMessageStreamRequest{
+		ChannelID: req.GetChannelId(),
+	})
+	if err != nil {
+		return err
+	}
+
+	for msg := range res.Messages {
+		messageInfo := &proto.MessageInfo{
+			Id:        msg.ID,
+			AuthorId:  msg.Author,
+			Content:   msg.Content,
+			Tenancy:   msg.Tenancy,
+			CreatedAt: timestamppb.New(msg.CreatedAt),
+		}
+
+		if msg.DeletedAt != nil {
+			messageInfo.DeletedAt = timestamppb.New(*msg.DeletedAt)
+		}
+
+		err = stream.Send(&proto.StreamMessagesResponse{
+			Message: messageInfo,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

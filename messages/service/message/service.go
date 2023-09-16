@@ -13,6 +13,7 @@ import (
 type MessageRepository interface {
 	Save(ctx context.Context, message message.Message) error
 	ListAllByChannelID(ctx context.Context, channelID channel.ID) ([]message.Message, error)
+	StreamAllByChannelID(ctx context.Context, channelID channel.ID) (<-chan message.Message, <-chan error)
 }
 
 type service struct {
@@ -72,5 +73,30 @@ func (svc service) GetMessages(ctx context.Context, req apiV1.GetMessagesRequest
 
 	return apiV1.GetMessagesResponse{
 		Messages: msgs,
+	}, nil
+}
+
+// GetMessageStream implements v1.Messages.
+func (svc service) GetMessageStream(ctx context.Context, req apiV1.GetMessageStreamRequest) (apiV1.GetMessageStreamResponse, error) {
+	msgs, _ := svc.messageRepository.StreamAllByChannelID(ctx, channel.ID(req.ChannelID))
+	// todo: consume and propagate errors
+
+	msgInfos := make(chan apiV1.MessageInfo)
+	go func() {
+		defer close(msgInfos)
+		for msg := range msgs {
+			msgInfos <- apiV1.MessageInfo{
+				ID:        msg.ID().String(),
+				Author:    msg.Author().String(),
+				Content:   msg.Content(),
+				Tenancy:   msg.Tenancy().String(),
+				CreatedAt: msg.CreatedAt(),
+				DeletedAt: msg.DeletedAt(),
+			}
+		}
+	}()
+
+	return apiV1.GetMessageStreamResponse{
+		Messages: msgInfos,
 	}, nil
 }
