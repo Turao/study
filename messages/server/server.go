@@ -58,6 +58,7 @@ func (s *server) SendMessage(ctx context.Context, req *proto.SendMessageRequest)
 		AuthorID:  req.GetAutorId(),
 		ChannelID: req.GetChannelId(),
 		Content:   req.GetContent(),
+		Tenancy:   req.GetTenancy(),
 	})
 	if err != nil {
 		return nil, err

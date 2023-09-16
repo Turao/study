@@ -6,6 +6,7 @@ import (
 	apiV1 "github.com/turao/topics/api/messages/v1"
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/messages/entity/message"
+	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/users/entity/user"
 )
 
@@ -34,6 +35,7 @@ func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest
 		message.WithAuthor(user.ID(req.AuthorID)),
 		message.WithChannel(channel.ID(req.ChannelID)),
 		message.WithContent(req.Content),
+		message.WithTenancy(metadata.Tenancy(req.Tenancy)),
 	)
 	if err != nil {
 		return apiV1.SendMessageResponse{}, err

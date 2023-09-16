@@ -14,6 +14,7 @@ type SendMessageRequest struct {
 	AuthorID  string `json:"authorId"`
 	ChannelID string `json:"channelId"`
 	Content   string `json:"content"`
+	Tenancy   string `json:"tenancy"`
 }
 
 type SendMessageResponse struct{}

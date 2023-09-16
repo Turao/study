@@ -13,6 +13,7 @@ message SendMessageRequest {
     string autor_id = 1;
     string channel_id = 2;
     string content = 3;
+    string tenancy = 4;
 }
 
 message SendMessageResponse {}

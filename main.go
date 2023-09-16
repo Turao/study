@@ -48,6 +48,7 @@ func messages() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer session.Close()
 
 	repository, err := messagerepository.NewRepository(session)
 	if err != nil {
@@ -147,6 +148,7 @@ func channels() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	defer session.Close()
 
 	repository, err := channelrepository.NewRepository(session)
 	if err != nil {
