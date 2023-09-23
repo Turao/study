@@ -29,6 +29,10 @@ type GetChannelInfoRequest struct {
 }
 
 type GetChannelInfoResponse struct {
+	Channel ChannelInfo
+}
+
+type ChannelInfo struct {
 	ID        string     `json:"id"`
 	Name      string     `json:"name"`
 	Tenancy   string     `json:"tenancy"`

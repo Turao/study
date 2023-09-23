@@ -33,6 +33,10 @@ type GetUserInfoRequest struct {
 }
 
 type GetUserInfoResponse struct {
+	User UserInfo
+}
+
+type UserInfo struct {
 	ID        string     `json:"id"`
 	Email     string     `json:"email"`
 	FirstName string     `json:"firstName"`

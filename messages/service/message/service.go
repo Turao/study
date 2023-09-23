@@ -51,28 +51,26 @@ func (svc service) SendMessage(ctx context.Context, req apiV1.SendMessageRequest
 }
 
 func (svc service) GetMessages(ctx context.Context, req apiV1.GetMessagesRequest) (apiV1.GetMessagesResponse, error) {
-	messages, err := svc.messageRepository.ListAllByChannelID(ctx, channel.ID(req.ChannelID))
+	msgs, err := svc.messageRepository.ListAllByChannelID(ctx, channel.ID(req.ChannelID))
 	if err != nil {
 		return apiV1.GetMessagesResponse{}, err
 	}
 
-	msgs := []apiV1.MessageInfo{}
-	for _, message := range messages {
-		msgs = append(
-			msgs,
-			apiV1.MessageInfo{
-				ID:        message.ID().String(),
-				Author:    message.Author().String(),
-				Content:   message.Content(),
-				Tenancy:   message.Tenancy().String(),
-				CreatedAt: message.CreatedAt(),
-				DeletedAt: message.DeletedAt(),
-			},
+	msgInfos := []apiV1.MessageInfo{}
+	for _, msg := range msgs {
+		msgInfo, err := messageMapper.ToMessageInfo(msg)
+		if err != nil {
+			return apiV1.GetMessagesResponse{}, err
+		}
+
+		msgInfos = append(
+			msgInfos,
+			msgInfo,
 		)
 	}
 
 	return apiV1.GetMessagesResponse{
-		Messages: msgs,
+		Messages: msgInfos,
 	}, nil
 }
 
@@ -85,14 +83,12 @@ func (svc service) GetMessageStream(ctx context.Context, req apiV1.GetMessageStr
 	go func() {
 		defer close(msgInfos)
 		for msg := range msgs {
-			msgInfos <- apiV1.MessageInfo{
-				ID:        msg.ID().String(),
-				Author:    msg.Author().String(),
-				Content:   msg.Content(),
-				Tenancy:   msg.Tenancy().String(),
-				CreatedAt: msg.CreatedAt(),
-				DeletedAt: msg.DeletedAt(),
+			msgInfo, err := messageMapper.ToMessageInfo(msg)
+			if err != nil {
+				return
 			}
+
+			msgInfos <- msgInfo
 		}
 	}()
 

@@ -68,11 +68,12 @@ func (svc service) GetChannelInfo(ctx context.Context, req apiV1.GetChannelInfoR
 		return apiV1.GetChannelInfoResponse{}, err
 	}
 
+	chInfo, err := channelMapper.ToChannelInfo(ch)
+	if err != nil {
+		return apiV1.GetChannelInfoResponse{}, err
+	}
+
 	return apiV1.GetChannelInfoResponse{
-		ID:        ch.ID().String(),
-		Name:      ch.Name(),
-		Tenancy:   ch.Tenancy().String(),
-		CreatedAt: ch.CreatedAt(),
-		DeletedAt: ch.DeletedAt(),
+		Channel: chInfo,
 	}, nil
 }
