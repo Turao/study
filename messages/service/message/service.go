@@ -3,8 +3,8 @@ package message
 import (
 	"context"
 
-	apiV1 "github.com/turao/topics/api/messages/v1"
 	"github.com/turao/topics/channels/entity/channel"
+	apiV1 "github.com/turao/topics/messages/api/v1"
 	"github.com/turao/topics/messages/entity/message"
 	"github.com/turao/topics/metadata"
 	"github.com/turao/topics/users/entity/user"

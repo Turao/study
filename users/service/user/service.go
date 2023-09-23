@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	apiV1 "github.com/turao/topics/api/users/v1"
 	"github.com/turao/topics/metadata"
+	apiV1 "github.com/turao/topics/users/api/v1"
 	"github.com/turao/topics/users/entity/user"
 )
 

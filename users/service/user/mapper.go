@@ -1,7 +1,7 @@
 package user
 
 import (
-	apiV1 "github.com/turao/topics/api/users/v1"
+	apiV1 "github.com/turao/topics/users/api/v1"
 	"github.com/turao/topics/users/entity/user"
 )
 

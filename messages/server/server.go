@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	apiV1 "github.com/turao/topics/api/messages/v1"
+	apiV1 "github.com/turao/topics/messages/api/v1"
 	proto "github.com/turao/topics/proto/messages"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

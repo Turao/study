@@ -1,7 +1,7 @@
 package message
 
 import (
-	apiV1 "github.com/turao/topics/api/messages/v1"
+	apiV1 "github.com/turao/topics/messages/api/v1"
 	"github.com/turao/topics/messages/entity/message"
 )
 

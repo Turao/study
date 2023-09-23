@@ -3,7 +3,7 @@ package channel
 import (
 	"context"
 
-	apiV1 "github.com/turao/topics/api/channels/v1"
+	apiV1 "github.com/turao/topics/channels/api/v1"
 	"github.com/turao/topics/channels/entity/channel"
 	"github.com/turao/topics/metadata"
 )

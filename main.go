@@ -15,8 +15,8 @@ import (
 
 	"github.com/turao/topics/config"
 
-	v1 "github.com/turao/topics/api/channels/v1"
-	usersV1 "github.com/turao/topics/api/users/v1"
+	channelsV1 "github.com/turao/topics/channels/api/v1"
+	usersV1 "github.com/turao/topics/users/api/v1"
 	userrepository "github.com/turao/topics/users/repository/user"
 	userservice "github.com/turao/topics/users/service/user"
 
@@ -162,7 +162,7 @@ func channels() {
 
 	_, err = service.CreateChannel(
 		context.Background(),
-		v1.CreateChannelRequest{
+		channelsV1.CreateChannelRequest{
 			Name:    "tech-support",
 			Tenancy: "tenancy/test",
 		},
@@ -173,7 +173,7 @@ func channels() {
 
 	_, err = service.DeleteChannel(
 		context.Background(),
-		v1.DeleteChannelRequest{
+		channelsV1.DeleteChannelRequest{
 			ID: "969388f9-6199-402d-b550-55e87013f85a",
 		},
 	)
