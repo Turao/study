@@ -90,8 +90,6 @@ func (u *user) DeletedAt() *time.Time {
 }
 
 func (u *user) Delete() {
-	if u.DeletedAt() == nil {
-		now := time.Now()
-		u.deletedAt = &now
-	}
+	now := time.Now()
+	u.deletedAt = &now
 }
