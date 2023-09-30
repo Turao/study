@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocql/gocql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -33,8 +34,9 @@ import (
 
 func main() {
 	// users()
-	messages()
+	// messages()
 	// channelsCassandra()
+	channelsMySQL()
 }
 
 func messages() {
@@ -187,20 +189,20 @@ func channelsCassandra() {
 func channelsMySQL() {
 	cfg := config.MySQLConfig{
 		Host:     "localhost",
-		Port:     5432,
-		Database: "database",
-		User:     "pguser",
+		Port:     3306,
+		Database: "channels",
+		User:     "mysqluser",
 		Password: "pwd",
 	}
 
 	database, err := sqlx.Open(
-		"postgres",
+		"mysql",
 		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			cfg.Host,
-			cfg.Port,
+			"%s:%s@tcp(%s:%v)/%s?parseTime=true",
 			cfg.User,
 			cfg.Password,
+			cfg.Host,
+			cfg.Port,
 			cfg.Database,
 		),
 	)
@@ -233,7 +235,7 @@ func channelsMySQL() {
 	_, err = service.DeleteChannel(
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
-			ID: "969388f9-6199-402d-b550-55e87013f85a",
+			ID: "9aea047d-b456-4d30-ba5d-3141f02cc4f2",
 		},
 	)
 	if err != nil {

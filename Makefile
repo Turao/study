@@ -1,12 +1,13 @@
 # https://debezium.io/documentation/reference/2.1/tutorial.html
 STORAGE_DIR=${PWD}/storage
+STORAGE_MYSQL_DIR=${STORAGE_DIR}/mysql
 STORAGE_POSTGRES_DIR=${STORAGE_DIR}/postgres
 STORAGE_CASSANDRA_DIR=${STORAGE_DIR}/cassandra
 STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
 
 STORAGE_USERS_DIR=${STORAGE_POSTGRES_DIR}/users
 STORAGE_MESSAGES_DIR=${STORAGE_CASSANDRA_DIR}/messages
-STORAGE_CHANNELS_DIR=${STORAGE_CASSANDRA_DIR}/channels
+STORAGE_CHANNELS_DIR=${STORAGE_MYSQL_DIR}/channels
 
 
 # Storage - Users
@@ -26,21 +27,16 @@ migrate-force-storage-users:
 
 # Storage - Channels
 start-storage-channels:
-	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_CASSANDRA_DIR}/cassandra.yaml
-	docker run --rm -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
-	docker run -it --rm --name storage-channels -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
-
-shell-storage-channels:
-	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
+	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
 
 migrate-up-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose up 1
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
 
 migrate-down-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose down 1
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
 
 migrate-force-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/channels -verbose force ${version}
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
 
 
 # Storage - Messages

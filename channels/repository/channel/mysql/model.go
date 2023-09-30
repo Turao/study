@@ -5,9 +5,9 @@ import (
 )
 
 type Model struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	Tenancy   string     `json:"tenancy"`
-	CreatedAt time.Time  `json:"created_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	ID        string     `db:"id"`
+	Name      string     `db:"name"`
+	Tenancy   string     `db:"tenancy"`
+	CreatedAt time.Time  `db:"created_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
 }
