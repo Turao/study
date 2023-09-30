@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"github.com/gocql/gocql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/scylladb/gocqlx/v2"
 	"google.golang.org/grpc"
@@ -25,14 +26,15 @@ import (
 	messageservice "github.com/turao/topics/messages/service/message"
 	messagespb "github.com/turao/topics/proto/messages"
 
-	channelrepository "github.com/turao/topics/channels/repository/channel"
+	cassandrachannelrepository "github.com/turao/topics/channels/repository/channel/cassandra"
+	mysqlchannelrepository "github.com/turao/topics/channels/repository/channel/mysql"
 	channelservice "github.com/turao/topics/channels/service/channel"
 )
 
 func main() {
 	// users()
 	messages()
-	// channels()
+	// channelsCassandra()
 }
 
 func messages() {
@@ -135,7 +137,7 @@ func users() {
 	}
 }
 
-func channels() {
+func channelsCassandra() {
 	cfg := config.CassandraConfig{
 		Host:     "localhost",
 		Port:     9042,
@@ -150,7 +152,64 @@ func channels() {
 	}
 	defer session.Close()
 
-	repository, err := channelrepository.NewRepository(session)
+	repository, err := cassandrachannelrepository.NewRepository(session)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	service, err := channelservice.NewService(repository)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.CreateChannel(
+		context.Background(),
+		channelsV1.CreateChannelRequest{
+			Name:    "tech-support",
+			Tenancy: "tenancy/test",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.DeleteChannel(
+		context.Background(),
+		channelsV1.DeleteChannelRequest{
+			ID: "969388f9-6199-402d-b550-55e87013f85a",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func channelsMySQL() {
+	cfg := config.MySQLConfig{
+		Host:     "localhost",
+		Port:     5432,
+		Database: "database",
+		User:     "pguser",
+		Password: "pwd",
+	}
+
+	database, err := sqlx.Open(
+		"postgres",
+		fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			cfg.Host,
+			cfg.Port,
+			cfg.User,
+			cfg.Password,
+			cfg.Database,
+		),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer database.Close()
+
+	repository, err := mysqlchannelrepository.NewRepository(database)
 	if err != nil {
 		log.Fatalln(err)
 	}
