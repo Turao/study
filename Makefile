@@ -1,5 +1,6 @@
 # https://debezium.io/documentation/reference/2.1/tutorial.html
 STORAGE_DIR=${PWD}/storage
+STORAGE_SURREAL_DIR=${STORAGE_DIR}/surreal
 STORAGE_MYSQL_DIR=${STORAGE_DIR}/mysql
 STORAGE_POSTGRES_DIR=${STORAGE_DIR}/postgres
 STORAGE_CASSANDRA_DIR=${STORAGE_DIR}/cassandra
@@ -25,18 +26,22 @@ migrate-down-storage-users:
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
 
-# Storage - Channels
+## Storage - Channels (MySQL)
+# start-storage-channels:
+# 	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
+
+# migrate-up-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
+
+# migrate-down-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
+
+# migrate-force-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
+
+# Storage - Channels (SurrealDB)
 start-storage-channels:
-	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
-
-migrate-up-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
-
-migrate-down-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
-
-migrate-force-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
+	docker run -it --rm --name storage-channels -p 8000:8000 -v ${STORAGE_USERS_DIR}/mydata surrealdb/surrealdb start --auth --user root --pass root
 
 
 # Storage - Messages

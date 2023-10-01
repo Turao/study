@@ -52,6 +52,10 @@ func (svc service) DeleteChannel(ctx context.Context, req apiV1.DeleteChannelReq
 		return apiV1.DeleteChannelResponse{}, err
 	}
 
+	if ch == nil {
+		return apiV1.DeleteChannelResponse{}, nil
+	}
+
 	ch = ch.Delete()
 	err = svc.channelRepository.Save(ctx, ch)
 	if err != nil {

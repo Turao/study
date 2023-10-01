@@ -12,6 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/scylladb/gocqlx/v2"
+	"github.com/surrealdb/surrealdb.go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -29,6 +30,7 @@ import (
 
 	cassandrachannelrepository "github.com/turao/topics/channels/repository/channel/cassandra"
 	mysqlchannelrepository "github.com/turao/topics/channels/repository/channel/mysql"
+	surrealdbchannelrepository "github.com/turao/topics/channels/repository/channel/surrealdb"
 	channelservice "github.com/turao/topics/channels/service/channel"
 )
 
@@ -36,7 +38,8 @@ func main() {
 	// users()
 	// messages()
 	// channelsCassandra()
-	channelsMySQL()
+	// channelsMySQL()
+	channelsSurrealDB()
 }
 
 func messages() {
@@ -236,6 +239,69 @@ func channelsMySQL() {
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
 			ID: "9aea047d-b456-4d30-ba5d-3141f02cc4f2",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func channelsSurrealDB() {
+	cfg := config.SurrealDBConfig{
+		Host:      "localhost",
+		Port:      8000,
+		Namespace: "channels",
+		Database:  "channels",
+		User:      "root",
+		Password:  "root",
+	}
+
+	database, err := surrealdb.New(
+		fmt.Sprintf("ws://%s:%v/rpc", cfg.Host, cfg.Port),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer database.Close()
+
+	_, err = database.Signin(map[string]string{
+		"user": cfg.User,
+		"pass": cfg.Password,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = database.Use("channels", cfg.Database)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	repository, err := surrealdbchannelrepository.NewRepository(database)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	service, err := channelservice.NewService(repository)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.CreateChannel(
+		context.Background(),
+		channelsV1.CreateChannelRequest{
+			Name:    "tech-support",
+			Tenancy: "tenancy/test",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.DeleteChannel(
+		context.Background(),
+		channelsV1.DeleteChannelRequest{
+			ID: "eafde1c1-67e1-43a1-b19e-c2f42e213733",
 		},
 	)
 	if err != nil {

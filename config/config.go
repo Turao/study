@@ -22,6 +22,15 @@ type MySQLConfig struct {
 	Password string
 }
 
+type SurrealDBConfig struct {
+	Host      string
+	Port      int
+	Database  string
+	Namespace string
+	User      string
+	Password  string
+}
+
 type Users struct {
 	DatabaseConfig PostgresConfig
 }
