@@ -2,10 +2,9 @@ package user
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/turao/topics/users/entity/user"
 )
 
@@ -13,13 +12,11 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-const _TableName = "users"
-
 type repository struct {
-	database *sql.DB
+	database *sqlx.DB
 }
 
-func NewRepository(database *sql.DB) (*repository, error) {
+func NewRepository(database *sqlx.DB) (*repository, error) {
 	if database == nil {
 		return nil, errors.New("database connection is nil")
 	}
@@ -35,16 +32,17 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 		return err
 	}
 
-	_, err = r.database.QueryContext(
+	_, err = r.database.NamedExecContext(
 		ctx,
-		fmt.Sprintf("INSERT INTO %s values($1, $2, $3, $4, $5, $6, $7)", _TableName),
-		model.ID,
-		model.Email,
-		model.FirstName,
-		model.LastName,
-		model.Tenancy,
-		model.CreatedAt,
-		model.DeletedAt,
+		`INSERT INTO users VALUES (:id, :email, :first_name, :last_name, :tenancy, :created_at, :deleted_at)
+		ON CONFLICT (id) DO UPDATE SET 
+		email=:email, 
+		first_name=:first_name, 
+		last_name=:last_name, 
+		tenancy=:tenancy, 
+		created_at=:created_at, 
+		deleted_at=:deleted_at`,
+		model,
 	)
 
 	return err
@@ -52,11 +50,12 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 
 func (r *repository) FindByID(ctx context.Context, userID user.ID) (user.User, error) {
 	var model Model
-	err := r.database.QueryRowContext(
+	err := r.database.GetContext(
 		ctx,
-		fmt.Sprintf("SELECT FROM %s WHERE id = $1", _TableName),
-		model.ID,
-	).Scan(&model)
+		&model,
+		"SELECT * FROM users WHERE id = $1",
+		userID,
+	)
 	if err != nil {
 		return nil, err
 	}

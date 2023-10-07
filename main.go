@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -36,12 +35,12 @@ import (
 )
 
 func main() {
-	// users()
+	users()
 	// messages()
 	// channelsCassandra()
 	// channelsMySQL()
 	// channelsSurrealDB()
-	channelsPostgres()
+	// channelsPostgres()
 }
 
 func messages() {
@@ -88,25 +87,23 @@ func messages() {
 }
 
 func users() {
-	userscfg := config.Users{
-		DatabaseConfig: config.PostgresConfig{
-			Host:     "localhost",
-			Port:     5432,
-			Database: "database",
-			User:     "pguser",
-			Password: "pwd",
-		},
+	cfg := config.PostgresConfig{
+		Host:     "localhost",
+		Port:     5432,
+		Database: "database",
+		User:     "pguser",
+		Password: "pwd",
 	}
 
-	database, err := sql.Open(
+	database, err := sqlx.Open(
 		"postgres",
 		fmt.Sprintf(
 			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			userscfg.DatabaseConfig.Host,
-			userscfg.DatabaseConfig.Port,
-			userscfg.DatabaseConfig.User,
-			userscfg.DatabaseConfig.Password,
-			userscfg.DatabaseConfig.Database,
+			cfg.Host,
+			cfg.Port,
+			cfg.User,
+			cfg.Password,
+			cfg.Database,
 		),
 	)
 	if err != nil {
