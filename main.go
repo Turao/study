@@ -30,6 +30,7 @@ import (
 
 	cassandrachannelrepository "github.com/turao/topics/channels/repository/channel/cassandra"
 	mysqlchannelrepository "github.com/turao/topics/channels/repository/channel/mysql"
+	psotgreschannelrepository "github.com/turao/topics/channels/repository/channel/postgres"
 	surrealdbchannelrepository "github.com/turao/topics/channels/repository/channel/surrealdb"
 	channelservice "github.com/turao/topics/channels/service/channel"
 )
@@ -39,7 +40,8 @@ func main() {
 	// messages()
 	// channelsCassandra()
 	// channelsMySQL()
-	channelsSurrealDB()
+	// channelsSurrealDB()
+	channelsPostgres()
 }
 
 func messages() {
@@ -302,6 +304,69 @@ func channelsSurrealDB() {
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
 			ID: "eafde1c1-67e1-43a1-b19e-c2f42e213733",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func channelsPostgres() {
+	cfg := config.PostgresConfig{
+		Host:     "localhost",
+		Port:     5432,
+		Database: "database",
+		User:     "pguser",
+		Password: "pwd",
+	}
+
+	database, err := sqlx.Open(
+		"postgres",
+		fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			cfg.Host,
+			cfg.Port,
+			cfg.User,
+			cfg.Password,
+			cfg.Database,
+		),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer database.Close()
+
+	// sql connections are lazy loaded. call ping to make sure our database connects
+	err = database.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	repository, err := psotgreschannelrepository.NewRepository(database)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	service, err := channelservice.NewService(repository)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.CreateChannel(
+		context.Background(),
+		channelsV1.CreateChannelRequest{
+			Name:    "tech-support",
+			Tenancy: "tenancy/test",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.DeleteChannel(
+		context.Background(),
+		channelsV1.DeleteChannelRequest{
+			ID: "3eecad40-a879-4848-831b-8685f2d284fc",
 		},
 	)
 	if err != nil {
