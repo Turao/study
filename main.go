@@ -35,10 +35,10 @@ import (
 )
 
 func main() {
-	users()
+	// users()
 	// messages()
 	// channelsCassandra()
-	// channelsMySQL()
+	channelsMySQL()
 	// channelsSurrealDB()
 	// channelsPostgres()
 }
@@ -237,7 +237,7 @@ func channelsMySQL() {
 	_, err = service.DeleteChannel(
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
-			ID: "9aea047d-b456-4d30-ba5d-3141f02cc4f2",
+			ID: "900c89f1-da70-431a-ae4a-7a51cbab8625",
 		},
 	)
 	if err != nil {

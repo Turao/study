@@ -40,7 +40,8 @@ func (r *repository) Save(ctx context.Context, channel channel.Channel) error {
 
 	_, err = r.database.NamedExecContext(
 		ctx,
-		"REPLACE INTO channels VALUES (:id, :name, :tenancy, :created_at, :deleted_at)",
+		`INSERT INTO channels VALUES (:id, :name, :tenancy, :created_at, :deleted_at)
+		ON DUPLICATE KEY UPDATE name=:name, tenancy=:tenancy, created_at=:created_at, deleted_at=:deleted_at`,
 		model,
 	)
 	if err != nil {

@@ -8,7 +8,7 @@ STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
 
 STORAGE_USERS_DIR=${STORAGE_POSTGRES_DIR}/users
 STORAGE_MESSAGES_DIR=${STORAGE_CASSANDRA_DIR}/messages
-STORAGE_CHANNELS_DIR=${STORAGE_POSTGRES_DIR}/channels
+STORAGE_CHANNELS_DIR=${STORAGE_MYSQL_DIR}/channels
 
 
 # Storage - Users
@@ -26,35 +26,35 @@ migrate-down-storage-users:
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
 
-## Storage - Channels (MySQL)
-# start-storage-channels:
-# 	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
+# Storage - Channels (MySQL)
+start-storage-channels:
+	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
 
-# migrate-up-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
+migrate-up-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
 
-# migrate-down-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
+migrate-down-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
 
-# migrate-force-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
+migrate-force-storage-channels:
+	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
 
 # # Storage - Channels (SurrealDB)
 # start-storage-channels:
 # 	docker run -it --rm --name storage-channels -p 8000:8000 -v ${STORAGE_CHANNELS_DIR}/mydata surrealdb/surrealdb start --auth --user root --pass root
 
-# Storage - Channels (Postgres)
-start-storage-channels:
-	docker run -it --rm --name storage-channels -p 5432:5432 -e POSTGRES_DB=database -e POSTGRES_USER=pguser -e POSTGRES_PASSWORD=pwd postgres
+# # Storage - Channels (Postgres)
+# start-storage-channels:
+# 	docker run -it --rm --name storage-channels -p 5432:5432 -e POSTGRES_DB=database -e POSTGRES_USER=pguser -e POSTGRES_PASSWORD=pwd postgres
 
-migrate-up-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose up 1
+# migrate-up-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose up 1
 
-migrate-down-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose down 1
+# migrate-down-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose down 1
 
-migrate-force-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
+# migrate-force-storage-channels:
+# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
 
 
 # Storage - Messages
