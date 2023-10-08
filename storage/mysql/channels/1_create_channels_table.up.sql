@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS channels(
   created_at TIMESTAMP,
   deleted_at TIMESTAMP
 );
+
+ALTER TABLE channels ADD CONSTRAINT unique_id_version UNIQUE (id, version);

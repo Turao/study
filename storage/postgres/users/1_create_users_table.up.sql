@@ -10,4 +10,6 @@ CREATE TABLE IF NOT EXISTS users(
   deleted_at TIMESTAMP
 );
 
+ALTER TABLE users ADD CONSTRAINT unique_id_version UNIQUE (id, version);
+
 ALTER TABLE users REPLICA IDENTITY FULL;
