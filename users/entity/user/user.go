@@ -16,6 +16,7 @@ func (id ID) String() string {
 
 type User interface {
 	ID() ID
+	Version() uint32
 
 	Email() string
 	FirstName() string
@@ -28,7 +29,8 @@ type User interface {
 }
 
 type user struct {
-	id ID
+	id      ID
+	version uint32
 
 	email     string
 	firstName string
@@ -65,6 +67,10 @@ func (u *user) ID() ID {
 	return u.id
 }
 
+func (u *user) Version() uint32 {
+	return u.version
+}
+
 func (u *user) FirstName() string {
 	return u.firstName
 }
@@ -92,4 +98,5 @@ func (u *user) DeletedAt() *time.Time {
 func (u *user) Delete() {
 	now := time.Now()
 	u.deletedAt = &now
+	u.version += 1
 }

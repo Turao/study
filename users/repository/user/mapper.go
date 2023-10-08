@@ -8,6 +8,7 @@ import (
 func ToModel(user user.User) (*Model, error) {
 	model := &Model{
 		ID:        user.ID().String(),
+		Version:   user.Version(),
 		Email:     user.Email(),
 		FirstName: user.FirstName(),
 		LastName:  user.LastName(),
@@ -22,6 +23,7 @@ func ToModel(user user.User) (*Model, error) {
 func ToEntity(model Model) (user.User, error) {
 	return user.NewUser(
 		user.WithID(user.ID(model.ID)),
+		user.WithVersion(model.Version),
 		user.WithEmail(model.Email),
 		user.WithFirstName(model.FirstName),
 		user.WithTenancy(metadata.Tenancy(model.Tenancy)),

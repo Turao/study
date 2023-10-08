@@ -26,6 +26,13 @@ func WithID(id ID) UserOption {
 	}
 }
 
+func WithVersion(version uint32) UserOption {
+	return func(u *user) error {
+		u.version = version
+		return nil
+	}
+}
+
 func WithEmail(email string) UserOption {
 	return func(u *user) error {
 		if email == "" {

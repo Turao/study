@@ -34,14 +34,8 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 
 	_, err = r.database.NamedExecContext(
 		ctx,
-		`INSERT INTO users VALUES (:id, :email, :first_name, :last_name, :tenancy, :created_at, :deleted_at)
-		ON CONFLICT (id) DO UPDATE SET 
-		email=:email, 
-		first_name=:first_name, 
-		last_name=:last_name, 
-		tenancy=:tenancy, 
-		created_at=:created_at, 
-		deleted_at=:deleted_at`,
+		`INSERT INTO users (id, version, email, first_name, last_name, tenancy, created_at, deleted_at)
+		VALUES (:id, :version, :email, :first_name, :last_name, :tenancy, :created_at, :deleted_at)`,
 		model,
 	)
 
@@ -53,7 +47,7 @@ func (r *repository) FindByID(ctx context.Context, userID user.ID) (user.User, e
 	err := r.database.GetContext(
 		ctx,
 		&model,
-		"SELECT * FROM users WHERE id = $1",
+		"SELECT * FROM users WHERE id = $1 ORDER BY version DESC LIMIT 1",
 		userID,
 	)
 	if err != nil {

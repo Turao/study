@@ -35,10 +35,10 @@ import (
 )
 
 func main() {
-	// users()
+	users()
 	// messages()
 	// channelsCassandra()
-	channelsMySQL()
+	// channelsMySQL()
 	// channelsSurrealDB()
 	// channelsPostgres()
 }

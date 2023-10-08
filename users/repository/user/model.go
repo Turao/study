@@ -6,6 +6,7 @@ import (
 
 type Model struct {
 	ID        string     `db:"id"`
+	Version   uint32     `db:"version"`
 	Email     string     `db:"email"`
 	FirstName string     `db:"first_name"`
 	LastName  string     `db:"last_name"`
