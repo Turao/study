@@ -19,6 +19,13 @@ func WithID(id ID) ChannelOption {
 	}
 }
 
+func WithVersion(version uint32) ChannelOption {
+	return func(ch *channel) error {
+		ch.version = version
+		return nil
+	}
+}
+
 func WithName(name string) ChannelOption {
 	return func(ch *channel) error {
 		if name == "" {

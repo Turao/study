@@ -24,7 +24,16 @@ func NewRepository(database *sqlx.DB) (*repository, error) {
 
 func (r *repository) FindByID(ctx context.Context, id channel.ID) (channel.Channel, error) {
 	var model Model
-	err := r.database.GetContext(ctx, &model, "SELECT * FROM channels WHERE id=?", id)
+	err := r.database.GetContext(
+		ctx,
+		&model,
+		`SELECT id, version, name, tenancy, created_at, deleted_at 
+		FROM channels 
+		WHERE id=? 
+		ORDER BY version DESC 
+		LIMIT 1`,
+		id,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +49,8 @@ func (r *repository) Save(ctx context.Context, channel channel.Channel) error {
 
 	_, err = r.database.NamedExecContext(
 		ctx,
-		`INSERT INTO channels VALUES (:id, :name, :tenancy, :created_at, :deleted_at)
-		ON DUPLICATE KEY UPDATE name=:name, tenancy=:tenancy, created_at=:created_at, deleted_at=:deleted_at`,
+		`INSERT INTO channels (id, version, name, tenancy, created_at, deleted_at) 
+		VALUES (:id, :version, :name, :tenancy, :created_at, :deleted_at)`,
 		model,
 	)
 	if err != nil {

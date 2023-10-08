@@ -237,7 +237,7 @@ func channelsMySQL() {
 	_, err = service.DeleteChannel(
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
-			ID: "900c89f1-da70-431a-ae4a-7a51cbab8625",
+			ID: "2c95398b-a8d9-4ffe-a149-388167e313b5",
 		},
 	)
 	if err != nil {

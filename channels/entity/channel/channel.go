@@ -16,6 +16,7 @@ func (id ID) String() string {
 
 type Channel interface {
 	ID() ID
+	Version() uint32
 	Name() string
 
 	metadata.MultiTenant
@@ -25,8 +26,9 @@ type Channel interface {
 }
 
 type channel struct {
-	id   ID
-	name string
+	id      ID
+	version uint32
+	name    string
 
 	tenancy   metadata.Tenancy
 	createdAt time.Time
@@ -38,6 +40,7 @@ var _ Channel = (*channel)(nil)
 func NewChannel(opts ...ChannelOption) (*channel, error) {
 	channel := &channel{
 		id:        ID(uuid.Must(uuid.NewV4()).String()),
+		version:   0,
 		name:      "",
 		tenancy:   metadata.TenancyTesting,
 		createdAt: time.Now(),
@@ -59,6 +62,9 @@ func NewChannel(opts ...ChannelOption) (*channel, error) {
 func (ch channel) ID() ID {
 	return ch.id
 }
+func (ch channel) Version() uint32 {
+	return ch.version
+}
 
 func (ch channel) Name() string {
 	return ch.name
@@ -79,5 +85,6 @@ func (ch channel) DeletedAt() *time.Time {
 func (ch channel) Delete() Channel {
 	now := time.Now()
 	ch.deletedAt = &now
+	ch.version += 1
 	return ch
 }

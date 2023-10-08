@@ -8,6 +8,7 @@ import (
 func ToModel(channel channel.Channel) (*Model, error) {
 	return &Model{
 		ID:        channel.ID().String(),
+		Version:   channel.Version(),
 		Name:      channel.Name(),
 		Tenancy:   channel.Tenancy().String(),
 		CreatedAt: channel.CreatedAt(),
@@ -18,6 +19,7 @@ func ToModel(channel channel.Channel) (*Model, error) {
 func ToEntity(model Model) (channel.Channel, error) {
 	return channel.NewChannel(
 		channel.WithID(channel.ID(model.ID)),
+		channel.WithVersion(model.Version),
 		channel.WithName(model.Name),
 		channel.WithTenancy(metadata.Tenancy(model.Tenancy)),
 		channel.WithCreatedAt(model.CreatedAt),
