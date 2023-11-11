@@ -35,8 +35,8 @@ import (
 )
 
 func main() {
-	users()
-	// messages()
+	// users()
+	messages()
 	// channelsCassandra()
 	// channelsMySQL()
 	// channelsSurrealDB()

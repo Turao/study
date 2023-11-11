@@ -12,6 +12,7 @@ type MessageMapper struct{}
 func (MessageMapper) ToMessageInfo(message message.Message) (apiV1.MessageInfo, error) {
 	return apiV1.MessageInfo{
 		ID:        message.ID().String(),
+		Version:   message.Version(),
 		Author:    message.Author().String(),
 		Content:   message.Content(),
 		Tenancy:   message.Tenancy().String(),

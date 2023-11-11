@@ -19,10 +19,9 @@ type Channel interface {
 	Version() uint32
 	Name() string
 
-	metadata.MultiTenant
 	metadata.Auditable
-
-	Delete() Channel
+	metadata.Deletable
+	metadata.MultiTenant
 }
 
 type channel struct {
@@ -82,9 +81,8 @@ func (ch channel) DeletedAt() *time.Time {
 	return ch.deletedAt
 }
 
-func (ch channel) Delete() Channel {
+func (ch channel) Delete() {
 	now := time.Now()
 	ch.deletedAt = &now
 	ch.version += 1
-	return ch
 }

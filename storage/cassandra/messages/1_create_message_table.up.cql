@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS messages.message (
   id UUID,
+  version int,
   author UUID,
   channel text,
   content text,

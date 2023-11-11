@@ -22,9 +22,8 @@ type User interface {
 	FirstName() string
 	LastName() string
 
-	Delete()
-
 	metadata.Auditable
+	metadata.Deletable
 	metadata.MultiTenant
 }
 

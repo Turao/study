@@ -18,16 +18,21 @@ func (id ID) String() string {
 
 type Message interface {
 	ID() ID
+	Version() uint32
+
 	Author() user.ID
 	Channel() channel.ID
 	Content() string
 
-	metadata.MultiTenant
 	metadata.Auditable
+	metadata.Deletable
+	metadata.MultiTenant
 }
 
 type message struct {
 	id      ID
+	version uint32
+
 	author  user.ID
 	channel channel.ID
 	content string
@@ -63,6 +68,10 @@ func (m message) ID() ID {
 	return m.id
 }
 
+func (m message) Version() uint32 {
+	return m.version
+}
+
 func (m message) Author() user.ID {
 	return m.author
 }
@@ -81,6 +90,12 @@ func (m message) Tenancy() metadata.Tenancy {
 
 func (m message) CreatedAt() time.Time {
 	return m.createdAt
+}
+
+func (m *message) Delete() {
+	now := time.Now()
+	m.deletedAt = &now
+	m.version += 1
 }
 
 func (m message) DeletedAt() *time.Time {

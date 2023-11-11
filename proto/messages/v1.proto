@@ -37,9 +37,10 @@ message StreamMessagesResponse {
 
 message MessageInfo {
     string id = 1;
-    string author_id = 2;
-    string content = 3;
-    string tenancy = 4;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp deleted_at = 6;
+    uint32 version = 2;
+    string author_id = 3;
+    string content = 4;
+    string tenancy = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp deleted_at = 7;
 }

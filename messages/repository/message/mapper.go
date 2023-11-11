@@ -10,6 +10,7 @@ import (
 func ToModel(message message.Message) (*Model, error) {
 	return &Model{
 		ID:        message.ID().String(),
+		Version:   message.Version(),
 		Author:    message.Author().String(),
 		Channel:   message.Channel().String(),
 		Content:   message.Content(),
@@ -22,6 +23,7 @@ func ToModel(message message.Message) (*Model, error) {
 func ToEntity(model Model) (message.Message, error) {
 	return message.NewMessage(
 		message.WithID(message.ID(model.ID)),
+		message.WithVersion(model.Version),
 		message.WithAuthor(user.ID(model.Author)),
 		message.WithChannel(channel.ID(model.Channel)),
 		message.WithContent(model.Content),

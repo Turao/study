@@ -10,6 +10,7 @@ var _table = table.New(table.Metadata{
 	Name: "message",
 	Columns: []string{
 		"id",
+		"version",
 		"author",
 		"channel",
 		"content",
@@ -22,11 +23,13 @@ var _table = table.New(table.Metadata{
 	},
 	SortKey: []string{
 		"created_at",
+		"version",
 	},
 })
 
 type Model struct {
 	ID        string     `json:"id"`
+	Version   uint32     `json:"version"`
 	Author    string     `json:"author"`
 	Channel   string     `json:"channel"`
 	Content   string     `json:"content"`

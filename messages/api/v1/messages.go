@@ -38,6 +38,7 @@ type GetMessageStreamResponse struct {
 
 type MessageInfo struct {
 	ID        string     `json:"id"`
+	Version   uint32     `json:"version"`
 	Author    string     `json:"author"`
 	Content   string     `json:"content"`
 	Tenancy   string     `json:"tenancy"`

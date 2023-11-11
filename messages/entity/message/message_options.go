@@ -21,6 +21,13 @@ func WithID(id ID) MessageOption {
 	}
 }
 
+func WithVersion(version uint32) MessageOption {
+	return func(m *message) error {
+		m.version = version
+		return nil
+	}
+}
+
 func WithAuthor(author user.ID) MessageOption {
 	return func(msg *message) error {
 		if author == "" {

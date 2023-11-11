@@ -79,6 +79,7 @@ func (s *server) StreamMessages(req *proto.StreamMessagesRequest, stream proto.M
 	for msg := range res.Messages {
 		messageInfo := &proto.MessageInfo{
 			Id:        msg.ID,
+			Version:   msg.Version,
 			AuthorId:  msg.Author,
 			Content:   msg.Content,
 			Tenancy:   msg.Tenancy,
