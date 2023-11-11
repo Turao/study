@@ -12,6 +12,7 @@ import (
 
 type MessageRepository interface {
 	Save(ctx context.Context, message message.Message) error
+	FindOne(ctx context.Context, channelID channel.ID, messageID message.ID) (message.Message, error)
 	ListAllByChannelID(ctx context.Context, channelID channel.ID) ([]message.Message, error)
 	StreamAllByChannelID(ctx context.Context, channelID channel.ID) (<-chan message.Message, <-chan error)
 }
@@ -95,4 +96,20 @@ func (svc service) GetMessageStream(ctx context.Context, req apiV1.GetMessageStr
 	return apiV1.GetMessageStreamResponse{
 		Messages: msgInfos,
 	}, nil
+}
+
+func (svc service) DeleteMessage(ctx context.Context, req apiV1.DeleteMessageRequest) (apiV1.DeleteMessageResponse, error) {
+	msg, err := svc.messageRepository.FindOne(ctx, channel.ID(req.ChannelID), message.ID(req.MessageID))
+	if err != nil {
+		return apiV1.DeleteMessageResponse{}, err
+	}
+
+	msg.Delete()
+
+	err = svc.messageRepository.Save(ctx, msg)
+	if err != nil {
+		return apiV1.DeleteMessageResponse{}, err
+	}
+
+	return apiV1.DeleteMessageResponse{}, nil
 }

@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MessagesClient interface {
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
 	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error)
+	DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 	StreamMessages(ctx context.Context, in *StreamMessagesRequest, opts ...grpc.CallOption) (Messages_StreamMessagesClient, error)
 }
 
@@ -47,6 +48,15 @@ func (c *messagesClient) SendMessage(ctx context.Context, in *SendMessageRequest
 func (c *messagesClient) GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error) {
 	out := new(GetMessagesResponse)
 	err := c.cc.Invoke(ctx, "/Messages/GetMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagesClient) DeleteMessage(ctx context.Context, in *DeleteMessageRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error) {
+	out := new(DeleteMessageResponse)
+	err := c.cc.Invoke(ctx, "/Messages/DeleteMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +101,7 @@ func (x *messagesStreamMessagesClient) Recv() (*StreamMessagesResponse, error) {
 type MessagesServer interface {
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
 	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error)
+	DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error)
 	StreamMessages(*StreamMessagesRequest, Messages_StreamMessagesServer) error
 	mustEmbedUnimplementedMessagesServer()
 }
@@ -104,6 +115,9 @@ func (UnimplementedMessagesServer) SendMessage(context.Context, *SendMessageRequ
 }
 func (UnimplementedMessagesServer) GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
+func (UnimplementedMessagesServer) DeleteMessage(context.Context, *DeleteMessageRequest) (*DeleteMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessage not implemented")
 }
 func (UnimplementedMessagesServer) StreamMessages(*StreamMessagesRequest, Messages_StreamMessagesServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamMessages not implemented")
@@ -157,6 +171,24 @@ func _Messages_GetMessages_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Messages_DeleteMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).DeleteMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Messages/DeleteMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).DeleteMessage(ctx, req.(*DeleteMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Messages_StreamMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(StreamMessagesRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -192,6 +224,10 @@ var Messages_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMessages",
 			Handler:    _Messages_GetMessages_Handler,
+		},
+		{
+			MethodName: "DeleteMessage",
+			Handler:    _Messages_DeleteMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -32,6 +32,28 @@ func (r *repository) Save(ctx context.Context, message message.Message) error {
 	return nil
 }
 
+func (r *repository) FindOne(
+	ctx context.Context,
+	channelID channel.ID,
+	messageID message.ID,
+) (message.Message, error) {
+	model := Model{}
+
+	err := r.database.
+		Query(_table.Select()).
+		BindMap(map[string]interface{}{
+			"id":      messageID.String(),
+			"channel": channelID.String(),
+		}).
+		WithContext(ctx).
+		Get(&model)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToEntity(model)
+}
+
 func (r *repository) ListAllByChannelID(ctx context.Context, channelID channel.ID) ([]message.Message, error) {
 	models := []Model{}
 	err := r.database.Query(_table.SelectAll()).WithContext(ctx).SelectRelease(&models)

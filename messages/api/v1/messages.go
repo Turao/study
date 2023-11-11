@@ -8,6 +8,7 @@ import (
 type Messages interface {
 	SendMessage(ctx context.Context, req SendMessageRequest) (SendMessageResponse, error)
 	GetMessages(ctx context.Context, req GetMessagesRequest) (GetMessagesResponse, error)
+	DeleteMessage(ctx context.Context, req DeleteMessageRequest) (DeleteMessageResponse, error)
 	GetMessageStream(ctx context.Context, req GetMessageStreamRequest) (GetMessageStreamResponse, error)
 }
 
@@ -27,6 +28,13 @@ type GetMessagesRequest struct {
 type GetMessagesResponse struct {
 	Messages []MessageInfo `json:"messages"`
 }
+
+type DeleteMessageRequest struct {
+	ChannelID string `json:"channelId"`
+	MessageID string `json:"messageId"`
+}
+
+type DeleteMessageResponse struct{}
 
 type GetMessageStreamRequest struct {
 	ChannelID string `json:"channelId"`

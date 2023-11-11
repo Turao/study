@@ -7,6 +7,7 @@ import "google/protobuf/timestamp.proto";
 service Messages {
     rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {}
     rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse) {}
+    rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse) {}
     rpc StreamMessages(StreamMessagesRequest) returns (stream StreamMessagesResponse) {}
 }
 
@@ -26,6 +27,13 @@ message GetMessagesRequest {
 message GetMessagesResponse {
     repeated MessageInfo messages = 1;
 }
+
+message DeleteMessageRequest {
+    string channel_id = 1;
+    string message_id = 2;
+}
+
+message DeleteMessageResponse {}
 
 message StreamMessagesRequest {
     string channel_id = 1;

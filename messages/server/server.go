@@ -67,6 +67,19 @@ func (s *server) SendMessage(ctx context.Context, req *proto.SendMessageRequest)
 	return &proto.SendMessageResponse{}, nil
 }
 
+// DeleteMessage implements messages.MessagesServer.
+func (s *server) DeleteMessage(ctx context.Context, req *proto.DeleteMessageRequest) (*proto.DeleteMessageResponse, error) {
+	_, err := s.service.DeleteMessage(ctx, apiV1.DeleteMessageRequest{
+		ChannelID: req.GetChannelId(),
+		MessageID: req.GetMessageId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.DeleteMessageResponse{}, nil
+}
+
 // StreamMessages implements messages.MessagesServer.
 func (s *server) StreamMessages(req *proto.StreamMessagesRequest, stream proto.Messages_StreamMessagesServer) error {
 	res, err := s.service.GetMessageStream(stream.Context(), apiV1.GetMessageStreamRequest{
