@@ -18,8 +18,10 @@ import (
 	"github.com/turao/topics/config"
 
 	channelsV1 "github.com/turao/topics/channels/api/v1"
+	userspb "github.com/turao/topics/proto/users"
 	usersV1 "github.com/turao/topics/users/api/v1"
 	userrepository "github.com/turao/topics/users/repository/user"
+	usersserver "github.com/turao/topics/users/server"
 	userservice "github.com/turao/topics/users/service/user"
 
 	messagerepository "github.com/turao/topics/messages/repository/message"
@@ -35,8 +37,8 @@ import (
 )
 
 func main() {
-	// users()
-	messages()
+	users()
+	// messages()
 	// channelsCassandra()
 	// channelsMySQL()
 	// channelsSurrealDB()
@@ -137,6 +139,23 @@ func users() {
 		},
 	)
 	if err != nil {
+		log.Fatalln(err)
+	}
+
+	registrar := grpc.NewServer()
+	server, err := usersserver.NewServer(service)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	userspb.RegisterUsersServer(registrar, server)
+	reflection.Register(registrar)
+
+	listener, err := net.Listen("tcp", "localhost:8001")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)
 	}
 }

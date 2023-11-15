@@ -5,6 +5,7 @@ import (
 )
 
 type Model struct {
+	Key       string     `db:"_key"`
 	ID        string     `db:"id"`
 	Version   uint32     `db:"version"`
 	Email     string     `db:"email"`

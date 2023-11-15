@@ -26,6 +26,7 @@ func ToEntity(model Model) (user.User, error) {
 		user.WithVersion(model.Version),
 		user.WithEmail(model.Email),
 		user.WithFirstName(model.FirstName),
+		user.WithLastName(model.LastName),
 		user.WithTenancy(metadata.Tenancy(model.Tenancy)),
 		user.WithCreatedAt(model.CreatedAt),
 		user.WithDeletedAt(model.DeletedAt),

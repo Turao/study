@@ -16,5 +16,7 @@ func (UserMapper) ToUserInfo(user user.User) (apiV1.UserInfo, error) {
 		FirstName: user.FirstName(),
 		LastName:  user.LastName(),
 		Tenancy:   user.Tenancy().String(),
+		CreatedAt: user.CreatedAt(),
+		DeletedAt: user.DeletedAt(),
 	}, nil
 }
