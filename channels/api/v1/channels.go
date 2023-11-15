@@ -16,7 +16,9 @@ type CreateChannelRequest struct {
 	Tenancy string `json:"tenancy"`
 }
 
-type CreateChannelResponse struct{}
+type CreateChannelResponse struct {
+	ID string `json:"id"`
+}
 
 type DeleteChannelRequest struct {
 	ID string `json:"id"`

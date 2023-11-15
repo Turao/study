@@ -42,7 +42,9 @@ func (svc service) CreateChannel(ctx context.Context, req apiV1.CreateChannelReq
 		return apiV1.CreateChannelResponse{}, err
 	}
 
-	return apiV1.CreateChannelResponse{}, nil
+	return apiV1.CreateChannelResponse{
+		ID: channel.ID().String(),
+	}, nil
 }
 
 // DeleteChannel implements v1.Channels

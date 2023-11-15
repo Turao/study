@@ -33,7 +33,9 @@ import (
 	mysqlchannelrepository "github.com/turao/topics/channels/repository/channel/mysql"
 	psotgreschannelrepository "github.com/turao/topics/channels/repository/channel/postgres"
 	surrealdbchannelrepository "github.com/turao/topics/channels/repository/channel/surrealdb"
+	channelsserver "github.com/turao/topics/channels/server"
 	channelservice "github.com/turao/topics/channels/service/channel"
+	channelspb "github.com/turao/topics/proto/channels"
 )
 
 func main() {
@@ -386,6 +388,23 @@ func channelsPostgres() {
 		},
 	)
 	if err != nil {
+		log.Fatalln(err)
+	}
+
+	registrar := grpc.NewServer()
+	server, err := channelsserver.NewServer(service)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	channelspb.RegisterChannelsServer(registrar, server)
+	reflection.Register(registrar)
+
+	listener, err := net.Listen("tcp", "localhost:8001")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)
 	}
 }

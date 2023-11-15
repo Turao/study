@@ -22,7 +22,7 @@ func NewServer(service apiV1.Users) (*server, error) {
 }
 
 // RegisterUser ...
-func (s server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
+func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
 	res, err := s.service.RegisterUser(ctx, apiV1.RegisteUserRequest{
 		Email:     req.GetEmail(),
 		FirstName: req.GetFirstName(),
@@ -39,7 +39,7 @@ func (s server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest
 }
 
 // DeleteUser ...
-func (s server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
+func (s *server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
 	_, err := s.service.DeleteUser(ctx, apiV1.DeleteUserRequest{
 		ID: req.GetId(),
 	})
@@ -51,7 +51,7 @@ func (s server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*
 }
 
 // GetUserInfo ...
-func (s server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest) (*proto.GetUserInfoResponse, error) {
+func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest) (*proto.GetUserInfoResponse, error) {
 	res, err := s.service.GetUserInfo(ctx, apiV1.GetUserInfoRequest{
 		ID: req.GetId(),
 	})
@@ -59,19 +59,17 @@ func (s server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest) 
 		return nil, err
 	}
 
-	response := &proto.GetUserInfoResponse{
-		User: &proto.UserInfo{
-			Id:        res.User.ID,
-			Email:     res.User.Email,
-			FirstName: res.User.FirstName,
-			LastName:  res.User.LastName,
-			Tenancy:   res.User.Tenancy,
-			CreatedAt: timestamppb.New(res.User.CreatedAt),
-		},
+	userInfo := &proto.UserInfo{
+		Id:        res.User.ID,
+		Email:     res.User.Email,
+		FirstName: res.User.FirstName,
+		LastName:  res.User.LastName,
+		Tenancy:   res.User.Tenancy,
+		CreatedAt: timestamppb.New(res.User.CreatedAt),
 	}
 	if res.User.DeletedAt != nil {
-		response.User.DeletedAt = timestamppb.New(*res.User.DeletedAt)
+		userInfo.DeletedAt = timestamppb.New(*res.User.DeletedAt)
 	}
 
-	return response, nil
+	return &proto.GetUserInfoResponse{}, nil
 }

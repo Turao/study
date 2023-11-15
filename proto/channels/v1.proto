@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option go_package = "github.com/turao/topics/proto/channels";
+
+import "google/protobuf/timestamp.proto";
+
+service Channels {
+    rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse) {}
+    rpc DeleteChannel(DeleteChannelRequest) returns (DeleteChannelResponse) {}
+    rpc GetChannelInfo(GetChannelInfoRequest) returns (GetChannelInfoResponse) {}
+}
+
+message CreateChannelRequest {
+    string name = 1;
+    string tenancy = 2;
+}
+
+message CreateChannelResponse {
+    string id = 1;
+}
+
+message DeleteChannelRequest {
+    string id = 1;
+}
+
+message DeleteChannelResponse {}
+
+message GetChannelInfoRequest {
+    string id  = 1;
+}
+
+message GetChannelInfoResponse {
+    ChannelInfo channel = 1;
+}
+
+message ChannelInfo {
+    string id = 1;
+    string name = 2;
+    string tenancy = 3;
+    google.protobuf.Timestamp created_at = 4;
+    optional google.protobuf.Timestamp deleted_at = 5;
+}
