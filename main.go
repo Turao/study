@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/turao/topics/config"
+	"github.com/turao/topics/lib/grpc/interceptor"
 
 	channelsV1 "github.com/turao/topics/channels/api/v1"
 	userspb "github.com/turao/topics/proto/users"
@@ -144,7 +145,11 @@ func users() {
 		log.Fatalln(err)
 	}
 
-	registrar := grpc.NewServer()
+	registrar := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			interceptor.WithTenancyInterceptor(),
+		),
+	)
 	server, err := usersserver.NewServer(service)
 	if err != nil {
 		log.Fatalln(err)
