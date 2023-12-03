@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocql/gocql"
@@ -150,17 +152,24 @@ func users() {
 			interceptor.WithTenancyInterceptor(),
 		),
 	)
+
+	listener, err := net.Listen("tcp", "localhost:8001")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	go func() {
+		if err := http.ListenAndServe("localhost:8002", nil); err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
 	server, err := usersserver.NewServer(service)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	userspb.RegisterUsersServer(registrar, server)
 	reflection.Register(registrar)
-
-	listener, err := net.Listen("tcp", "localhost:8001")
-	if err != nil {
-		log.Fatalln(err)
-	}
 
 	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)
