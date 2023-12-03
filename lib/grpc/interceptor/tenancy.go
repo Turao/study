@@ -23,8 +23,9 @@ func WithTenancyInterceptor() grpc.UnaryServerInterceptor {
 		}
 
 		values := m.Get(key)
-		if len(values) != 1 {
+		if len(values) == 0 {
 			ctx = context.WithValue(ctx, HeaderTenancy, metadata.TenancyTesting)
+			return handler(ctx, req)
 		}
 
 		tenancy, err := metadata.NewTenancy(values[0])
