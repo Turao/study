@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/lib/pq"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
 	"github.com/turao/topics/config"
@@ -73,6 +75,7 @@ func main() {
 		Use:   "register",
 		Short: "registers a new user",
 		Run: func(cmd *cobra.Command, args []string) {
+			log.Println("registering user")
 			_, err := service.RegisterUser(
 				context.Background(),
 				v1.RegisteUserRequest{
@@ -97,6 +100,7 @@ func main() {
 		Use:   "delete",
 		Short: "deletes a new user",
 		Run: func(cmd *cobra.Command, args []string) {
+			log.Println("deleting user")
 			_, err := service.DeleteUser(
 				context.Background(),
 				v1.DeleteUserRequest{
@@ -111,4 +115,8 @@ func main() {
 	DeleteUserCommand.PersistentFlags().StringVar(&userID, "user-id", "", "user id")
 	RootCommand.AddCommand(&DeleteUserCommand)
 
+	err = RootCommand.Execute()
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
