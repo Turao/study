@@ -13,7 +13,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/scylladb/gocqlx/v2"
-	"github.com/surrealdb/surrealdb.go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -32,22 +31,14 @@ import (
 	messageservice "github.com/turao/topics/messages/service/message"
 	messagespb "github.com/turao/topics/proto/messages"
 
-	cassandrachannelrepository "github.com/turao/topics/channels/repository/channel/cassandra"
-	mysqlchannelrepository "github.com/turao/topics/channels/repository/channel/mysql"
-	psotgreschannelrepository "github.com/turao/topics/channels/repository/channel/postgres"
-	surrealdbchannelrepository "github.com/turao/topics/channels/repository/channel/surrealdb"
-	channelsserver "github.com/turao/topics/channels/server"
+	channelrepository "github.com/turao/topics/channels/repository/channel"
 	channelservice "github.com/turao/topics/channels/service/channel"
-	channelspb "github.com/turao/topics/proto/channels"
 )
 
 func main() {
-	users()
+	// users()
 	// messages()
-	// channelsCassandra()
-	// channelsMySQL()
-	// channelsSurrealDB()
-	// channelsPostgres()
+	channels()
 }
 
 func messages() {
@@ -176,54 +167,7 @@ func users() {
 	}
 }
 
-func channelsCassandra() {
-	cfg := config.CassandraConfig{
-		Host:     "localhost",
-		Port:     9042,
-		Keyspace: "channels",
-	}
-
-	cluster := gocql.NewCluster(fmt.Sprintf("%s:%v", cfg.Host, cfg.Port))
-	cluster.Keyspace = cfg.Keyspace
-	session, err := gocqlx.WrapSession(cluster.CreateSession())
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer session.Close()
-
-	repository, err := cassandrachannelrepository.NewRepository(session)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	service, err := channelservice.NewService(repository)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.CreateChannel(
-		context.Background(),
-		channelsV1.CreateChannelRequest{
-			Name:    "tech-support",
-			Tenancy: "tenancy/test",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.DeleteChannel(
-		context.Background(),
-		channelsV1.DeleteChannelRequest{
-			ID: "969388f9-6199-402d-b550-55e87013f85a",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func channelsMySQL() {
+func channels() {
 	cfg := config.MySQLConfig{
 		Host:     "localhost",
 		Port:     3306,
@@ -248,7 +192,7 @@ func channelsMySQL() {
 	}
 	defer database.Close()
 
-	repository, err := mysqlchannelrepository.NewRepository(database)
+	repository, err := channelrepository.NewRepository(database)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -272,153 +216,10 @@ func channelsMySQL() {
 	_, err = service.DeleteChannel(
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
-			ID: "2c95398b-a8d9-4ffe-a149-388167e313b5",
+			ID: "c8f472f6-af8f-445c-b1ee-b520b28c0778",
 		},
 	)
 	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func channelsSurrealDB() {
-	cfg := config.SurrealDBConfig{
-		Host:      "localhost",
-		Port:      8000,
-		Namespace: "channels",
-		Database:  "channels",
-		User:      "root",
-		Password:  "root",
-	}
-
-	database, err := surrealdb.New(
-		fmt.Sprintf("ws://%s:%v/rpc", cfg.Host, cfg.Port),
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer database.Close()
-
-	_, err = database.Signin(map[string]string{
-		"user": cfg.User,
-		"pass": cfg.Password,
-	})
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = database.Use("channels", cfg.Database)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	repository, err := surrealdbchannelrepository.NewRepository(database)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	service, err := channelservice.NewService(repository)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.CreateChannel(
-		context.Background(),
-		channelsV1.CreateChannelRequest{
-			Name:    "tech-support",
-			Tenancy: "tenancy/test",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.DeleteChannel(
-		context.Background(),
-		channelsV1.DeleteChannelRequest{
-			ID: "eafde1c1-67e1-43a1-b19e-c2f42e213733",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func channelsPostgres() {
-	cfg := config.PostgresConfig{
-		Host:     "localhost",
-		Port:     5432,
-		Database: "database",
-		User:     "pguser",
-		Password: "pwd",
-	}
-
-	database, err := sqlx.Open(
-		"postgres",
-		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			cfg.Host,
-			cfg.Port,
-			cfg.User,
-			cfg.Password,
-			cfg.Database,
-		),
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer database.Close()
-
-	// sql connections are lazy loaded. call ping to make sure our database connects
-	err = database.Ping()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	repository, err := psotgreschannelrepository.NewRepository(database)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	service, err := channelservice.NewService(repository)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.CreateChannel(
-		context.Background(),
-		channelsV1.CreateChannelRequest{
-			Name:    "tech-support",
-			Tenancy: "tenancy/test",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = service.DeleteChannel(
-		context.Background(),
-		channelsV1.DeleteChannelRequest{
-			ID: "3eecad40-a879-4848-831b-8685f2d284fc",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	registrar := grpc.NewServer()
-	server, err := channelsserver.NewServer(service)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	channelspb.RegisterChannelsServer(registrar, server)
-	reflection.Register(registrar)
-
-	listener, err := net.Listen("tcp", "localhost:8001")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)
 	}
 }

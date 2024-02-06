@@ -62,35 +62,35 @@ func NewUser(opts ...UserOption) (*user, error) {
 	return user, nil
 }
 
-func (u *user) ID() ID {
+func (u user) ID() ID {
 	return u.id
 }
 
-func (u *user) Version() uint32 {
+func (u user) Version() uint32 {
 	return u.version
 }
 
-func (u *user) FirstName() string {
+func (u user) FirstName() string {
 	return u.firstName
 }
 
-func (u *user) LastName() string {
+func (u user) LastName() string {
 	return u.lastName
 }
 
-func (u *user) Email() string {
+func (u user) Email() string {
 	return u.email
 }
 
-func (u *user) Tenancy() metadata.Tenancy {
+func (u user) Tenancy() metadata.Tenancy {
 	return u.tenancy
 }
 
-func (u *user) CreatedAt() time.Time {
+func (u user) CreatedAt() time.Time {
 	return u.createdAt
 }
 
-func (u *user) DeletedAt() *time.Time {
+func (u user) DeletedAt() *time.Time {
 	return u.deletedAt
 }
 

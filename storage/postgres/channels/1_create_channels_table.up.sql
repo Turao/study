@@ -1,9 +1,0 @@
-CREATE TABLE IF NOT EXISTS channels(
-  id UUID PRIMARY KEY,
-  name VARCHAR(64),
-  tenancy VARCHAR(32),
-  created_at TIMESTAMP,
-  deleted_at TIMESTAMP
-);
-
-ALTER TABLE channels REPLICA IDENTITY FULL;

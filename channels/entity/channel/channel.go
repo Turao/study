@@ -58,30 +58,30 @@ func NewChannel(opts ...ChannelOption) (*channel, error) {
 	return channel, nil
 }
 
-func (ch channel) ID() ID {
+func (ch *channel) ID() ID {
 	return ch.id
 }
-func (ch channel) Version() uint32 {
+func (ch *channel) Version() uint32 {
 	return ch.version
 }
 
-func (ch channel) Name() string {
+func (ch *channel) Name() string {
 	return ch.name
 }
 
-func (ch channel) Tenancy() metadata.Tenancy {
+func (ch *channel) Tenancy() metadata.Tenancy {
 	return ch.tenancy
 }
 
-func (ch channel) CreatedAt() time.Time {
+func (ch *channel) CreatedAt() time.Time {
 	return ch.createdAt
 }
 
-func (ch channel) DeletedAt() *time.Time {
+func (ch *channel) DeletedAt() *time.Time {
 	return ch.deletedAt
 }
 
-func (ch channel) Delete() {
+func (ch *channel) Delete() {
 	now := time.Now()
 	ch.deletedAt = &now
 	ch.version += 1
