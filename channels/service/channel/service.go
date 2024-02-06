@@ -5,7 +5,9 @@ import (
 
 	apiV1 "github.com/turao/topics/channels/api/v1"
 	"github.com/turao/topics/channels/entity/channel"
+	"github.com/turao/topics/channels/entity/membership"
 	"github.com/turao/topics/metadata"
+	"github.com/turao/topics/users/entity/user"
 )
 
 type ChannelRepository interface {
@@ -13,17 +15,25 @@ type ChannelRepository interface {
 	FindByID(ctx context.Context, channelID channel.ID) (channel.Channel, error)
 }
 
+type MembershipRepository interface {
+	Save(ctx context.Context, membership membership.Membership) error
+	FindByID(ctx context.Context, membershipID membership.ID) (membership.Membership, error)
+}
+
 type service struct {
-	channelRepository ChannelRepository
+	channelRepository    ChannelRepository
+	membershipRepository MembershipRepository
 }
 
 var _ apiV1.Channels = (*service)(nil)
 
 func NewService(
 	channelRepository ChannelRepository,
+	membershipRepository MembershipRepository,
 ) (*service, error) {
 	return &service{
-		channelRepository: channelRepository,
+		channelRepository:    channelRepository,
+		membershipRepository: membershipRepository,
 	}, nil
 }
 
@@ -82,4 +92,31 @@ func (svc service) GetChannelInfo(ctx context.Context, req apiV1.GetChannelInfoR
 	return apiV1.GetChannelInfoResponse{
 		Channel: chInfo,
 	}, nil
+}
+
+func (svc service) JoinChannel(ctx context.Context, req apiV1.JoinChannelRequest) (apiV1.JoinChannelResponse, error) {
+	_, err := svc.channelRepository.FindByID(ctx, channel.ID(req.ChannelID))
+	if err != nil {
+		return apiV1.JoinChannelResponse{}, err
+	}
+
+	membershipID, err := membership.NewMembershipID(
+		channel.ID(req.ChannelID),
+		user.ID(req.UserID),
+	)
+	if err != nil {
+		return apiV1.JoinChannelResponse{}, err
+	}
+
+	membership, err := membership.NewMembership(membershipID)
+	if err != nil {
+		return apiV1.JoinChannelResponse{}, err
+	}
+
+	err = svc.membershipRepository.Save(ctx, membership)
+	if err != nil {
+		return apiV1.JoinChannelResponse{}, err
+	}
+
+	return apiV1.JoinChannelResponse{}, nil
 }

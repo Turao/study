@@ -9,6 +9,8 @@ type Channels interface {
 	CreateChannel(ctx context.Context, req CreateChannelRequest) (CreateChannelResponse, error)
 	DeleteChannel(ctx context.Context, req DeleteChannelRequest) (DeleteChannelResponse, error)
 	GetChannelInfo(ctx context.Context, req GetChannelInfoRequest) (GetChannelInfoResponse, error)
+
+	JoinChannel(ctx context.Context, req JoinChannelRequest) (JoinChannelResponse, error)
 }
 
 type CreateChannelRequest struct {
@@ -41,3 +43,10 @@ type ChannelInfo struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
 }
+
+type JoinChannelRequest struct {
+	ChannelID string `json:"channelId"`
+	UserID    string `json:"userId"`
+}
+
+type JoinChannelResponse struct{}

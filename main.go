@@ -32,6 +32,7 @@ import (
 	messagespb "github.com/turao/topics/proto/messages"
 
 	channelrepository "github.com/turao/topics/channels/repository/channel"
+	membershiprepository "github.com/turao/topics/channels/repository/membership"
 	channelservice "github.com/turao/topics/channels/service/channel"
 )
 
@@ -192,12 +193,20 @@ func channels() {
 	}
 	defer database.Close()
 
-	repository, err := channelrepository.NewRepository(database)
+	channelRepository, err := channelrepository.NewRepository(database)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	service, err := channelservice.NewService(repository)
+	membershipRepository, err := membershiprepository.NewRepository(database)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	service, err := channelservice.NewService(
+		channelRepository,
+		membershipRepository,
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -216,7 +225,18 @@ func channels() {
 	_, err = service.DeleteChannel(
 		context.Background(),
 		channelsV1.DeleteChannelRequest{
-			ID: "c8f472f6-af8f-445c-b1ee-b520b28c0778",
+			ID: "66dd5b74-c54a-11ee-aab2-0242ac110002",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.JoinChannel(
+		context.Background(),
+		channelsV1.JoinChannelRequest{
+			ChannelID: "7527542f-7bb9-46cc-b702-7b71047bbf78",
+			UserID:    "7b0ba219-a020-4821-a494-9233143866f0",
 		},
 	)
 	if err != nil {
