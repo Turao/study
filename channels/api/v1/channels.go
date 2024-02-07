@@ -11,6 +11,7 @@ type Channels interface {
 	GetChannelInfo(ctx context.Context, req GetChannelInfoRequest) (GetChannelInfoResponse, error)
 
 	JoinChannel(ctx context.Context, req JoinChannelRequest) (JoinChannelResponse, error)
+	LeaveChannel(ctx context.Context, req LeaveChannelRequest) (LeaveChannelResponse, error)
 }
 
 type CreateChannelRequest struct {
@@ -50,3 +51,10 @@ type JoinChannelRequest struct {
 }
 
 type JoinChannelResponse struct{}
+
+type LeaveChannelRequest struct {
+	ChannelID string `json:"channelId"`
+	UserID    string `json:"userId"`
+}
+
+type LeaveChannelResponse struct{}

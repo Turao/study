@@ -211,31 +211,42 @@ func channels() {
 		log.Fatalln(err)
 	}
 
-	_, err = service.CreateChannel(
-		context.Background(),
-		channelsV1.CreateChannelRequest{
-			Name:    "tech-support",
-			Tenancy: "tenancy/test",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// _, err = service.CreateChannel(
+	// 	context.Background(),
+	// 	channelsV1.CreateChannelRequest{
+	// 		Name:    "tech-support",
+	// 		Tenancy: "tenancy/test",
+	// 	},
+	// )
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
-	_, err = service.DeleteChannel(
-		context.Background(),
-		channelsV1.DeleteChannelRequest{
-			ID: "66dd5b74-c54a-11ee-aab2-0242ac110002",
-		},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// _, err = service.DeleteChannel(
+	// 	context.Background(),
+	// 	channelsV1.DeleteChannelRequest{
+	// 		ID: "66dd5b74-c54a-11ee-aab2-0242ac110002",
+	// 	},
+	// )
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
 	_, err = service.JoinChannel(
 		context.Background(),
 		channelsV1.JoinChannelRequest{
-			ChannelID: "7527542f-7bb9-46cc-b702-7b71047bbf78",
+			ChannelID: "cbd57c85-c54c-11ee-92d6-0242ac110002",
+			UserID:    "7b0ba219-a020-4821-a494-9233143866f0",
+		},
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = service.LeaveChannel(
+		context.Background(),
+		channelsV1.LeaveChannelRequest{
+			ChannelID: "cbd57c85-c54c-11ee-92d6-0242ac110002",
 			UserID:    "7b0ba219-a020-4821-a494-9233143866f0",
 		},
 	)

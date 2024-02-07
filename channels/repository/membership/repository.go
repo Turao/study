@@ -29,10 +29,11 @@ func (r *repository) FindByID(ctx context.Context, id membership.ID) (membership
 		&model,
 		`SELECT channel_id, user_id, version, tenancy, created_at, deleted_at 
 		FROM memberships 
-		WHERE id=? 
+		WHERE channel_id=? AND user_id=? 
 		ORDER BY version DESC 
 		LIMIT 1`,
-		id,
+		id.ChannelID().String(),
+		id.UserID().String(),
 	)
 	if err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package channel
 
 import (
 	"context"
+	"log"
 
 	apiV1 "github.com/turao/topics/channels/api/v1"
 	"github.com/turao/topics/channels/entity/channel"
@@ -95,7 +96,7 @@ func (svc service) GetChannelInfo(ctx context.Context, req apiV1.GetChannelInfoR
 }
 
 func (svc service) JoinChannel(ctx context.Context, req apiV1.JoinChannelRequest) (apiV1.JoinChannelResponse, error) {
-	_, err := svc.channelRepository.FindByID(ctx, channel.ID(req.ChannelID))
+	ch, err := svc.channelRepository.FindByID(ctx, channel.ID(req.ChannelID))
 	if err != nil {
 		return apiV1.JoinChannelResponse{}, err
 	}
@@ -108,15 +109,57 @@ func (svc service) JoinChannel(ctx context.Context, req apiV1.JoinChannelRequest
 		return apiV1.JoinChannelResponse{}, err
 	}
 
-	membership, err := membership.NewMembership(membershipID)
+	var newMembership membership.Membership
+	found, err := svc.membershipRepository.FindByID(ctx, membershipID)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if found != nil {
+		newMembership, err = membership.NewMembership(
+			membershipID,
+			membership.WithTenancy(ch.Tenancy()),
+			membership.WithVersion(found.Version()+1),
+		)
+	} else {
+		newMembership, err = membership.NewMembership(
+			membershipID,
+			membership.WithTenancy(ch.Tenancy()),
+		)
+	}
+
 	if err != nil {
 		return apiV1.JoinChannelResponse{}, err
 	}
 
-	err = svc.membershipRepository.Save(ctx, membership)
+	err = svc.membershipRepository.Save(ctx, newMembership)
 	if err != nil {
 		return apiV1.JoinChannelResponse{}, err
 	}
 
 	return apiV1.JoinChannelResponse{}, nil
+}
+
+func (svc service) LeaveChannel(ctx context.Context, req apiV1.LeaveChannelRequest) (apiV1.LeaveChannelResponse, error) {
+	membershipID, err := membership.NewMembershipID(
+		channel.ID(req.ChannelID),
+		user.ID(req.UserID),
+	)
+	if err != nil {
+		return apiV1.LeaveChannelResponse{}, err
+	}
+
+	membership, err := svc.membershipRepository.FindByID(ctx, membershipID)
+	if err != nil {
+		return apiV1.LeaveChannelResponse{}, err
+	}
+
+	membership.Delete()
+
+	err = svc.membershipRepository.Save(ctx, membership)
+	if err != nil {
+		return apiV1.LeaveChannelResponse{}, err
+	}
+
+	return apiV1.LeaveChannelResponse{}, nil
 }
