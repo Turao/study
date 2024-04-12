@@ -37,9 +37,9 @@ import (
 )
 
 func main() {
-	// users()
+	users()
 	// messages()
-	channels()
+	// channels()
 }
 
 func messages() {
@@ -145,13 +145,13 @@ func users() {
 		),
 	)
 
-	listener, err := net.Listen("tcp", "localhost:8001")
+	listener, err := net.Listen("tcp", "localhost:9090")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	go func() {
-		if err := http.ListenAndServe("localhost:8002", nil); err != nil {
+		if err := http.ListenAndServe("localhost:8081", nil); err != nil {
 			log.Fatalln(err)
 		}
 	}()
