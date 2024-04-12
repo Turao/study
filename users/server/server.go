@@ -71,5 +71,15 @@ func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest)
 		userInfo.DeletedAt = timestamppb.New(*res.User.DeletedAt)
 	}
 
-	return &proto.GetUserInfoResponse{}, nil
+	return &proto.GetUserInfoResponse{
+		User: &proto.UserInfo{
+			Id:        userInfo.Id,
+			Email:     userInfo.Email,
+			FirstName: userInfo.FirstName,
+			LastName:  userInfo.LastName,
+			Tenancy:   userInfo.Tenancy,
+			CreatedAt: userInfo.CreatedAt,
+			DeletedAt: userInfo.DeletedAt,
+		},
+	}, nil
 }
