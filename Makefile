@@ -7,8 +7,6 @@ STORAGE_CASSANDRA_DIR=${STORAGE_DIR}/cassandra
 STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
 
 STORAGE_USERS_DIR=${STORAGE_POSTGRES_DIR}/users
-STORAGE_MESSAGES_DIR=${STORAGE_CASSANDRA_DIR}/messages
-STORAGE_CHANNELS_DIR=${STORAGE_MYSQL_DIR}/channels
 
 
 # Storage - Users
@@ -26,56 +24,6 @@ migrate-down-storage-users:
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
 
-# Storage - Channels (MySQL)
-start-storage-channels:
-	docker run -it --rm --name storage-channels -p 3306:3306 -e MYSQL_ROOT_PASSWORD=securepwd -e MYSQL_DATABASE=channels -e MYSQL_USER=mysqluser -e MYSQL_PASSWORD=pwd mysql
-
-migrate-up-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose up 1
-
-migrate-down-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose down 1
-
-migrate-force-storage-channels:
-	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database "mysql://mysqluser:pwd@tcp(localhost:3306)/channels?query" -verbose force ${version}
-
-# # Storage - Channels (SurrealDB)
-# start-storage-channels:
-# 	docker run -it --rm --name storage-channels -p 8000:8000 -v ${STORAGE_CHANNELS_DIR}/mydata surrealdb/surrealdb start --auth --user root --pass root
-
-# # Storage - Channels (Postgres)
-# start-storage-channels:
-# 	docker run -it --rm --name storage-channels -p 5432:5432 -e POSTGRES_DB=database -e POSTGRES_USER=pguser -e POSTGRES_PASSWORD=pwd postgres
-
-# migrate-up-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose up 1
-
-# migrate-down-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose down 1
-
-# migrate-force-storage-channels:
-# 	docker run -v ${STORAGE_CHANNELS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
-
-
-# Storage - Messages
-start-storage-messages:
-	docker run -i --rm cassandra cat /etc/cassandra/cassandra.yaml > ${STORAGE_CASSANDRA_DIR}/cassandra.yaml
-	docker run --rm -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/cassandra.yaml mikefarah/yq -e -i '.cdc_enabled = true' /cassandra.yaml
-	docker run -it --rm --name storage-messages -v ${STORAGE_CASSANDRA_DIR}/cassandra.yaml:/etc/cassandra/cassandra.yaml -p 9042:9042 cassandra
-
-shell-storage-messages:
-	docker run -it --rm --name cqlsh --network host --rm cassandra cqlsh
-
-migrate-up-storage-messages:
-	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose up 1
-
-migrate-down-storage-messages:
-	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose down 1
-
-migrate-force-storage-messages:
-	docker run -v ${STORAGE_MESSAGES_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database cassandra://localhost:9042/messages -verbose force ${version}
-
-
 # Messaging
 start-zookeeper:
 	docker run -it --rm --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 quay.io/debezium/zookeeper:2.1
@@ -92,6 +40,4 @@ register-storage-connectors:
 
 # GRPC / Protobuf
 proto-gen:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/channels/v1.proto
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/messages/v1.proto
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/users/v1.proto
