@@ -21,6 +21,7 @@ type Group interface {
 
 	Name() string
 	Members() map[MemberID]struct{}
+	SetMembers(members map[MemberID]struct{})
 	metadata.Auditable
 	metadata.Deletable
 	metadata.MultiTenant
@@ -73,6 +74,11 @@ func (g group) Name() string {
 
 func (g group) Members() map[MemberID]struct{} {
 	return g.members
+}
+
+func (g *group) SetMembers(members map[MemberID]struct{}) {
+	g.members = members
+	g.version += 1
 }
 
 func (g group) Tenancy() metadata.Tenancy {

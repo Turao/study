@@ -33,13 +33,23 @@ func ToGroupMemberModels(group group.Group) ([]*GroupMemberModel, error) {
 	return groupMemberModels, nil
 }
 
-func ToEntity(model GroupModel) (group.Group, error) {
+func ToEntity(groupModel GroupModel, groupMemberModels []GroupMemberModel) (group.Group, error) {
+	memberIDs := make(map[group.MemberID]struct{})
+	for _, groupMemberModel := range groupMemberModels {
+		if groupMemberModel.GroupID != groupMemberModel.GroupID || groupMemberModel.GroupVersion != groupModel.Version {
+			continue // skip
+		}
+		memberID := group.MemberID(groupMemberModel.MemberID)
+		memberIDs[memberID] = struct{}{}
+	}
+
 	return group.NewGroup(
-		group.WithID(group.ID(model.ID)),
-		group.WithVersion(model.Version),
-		group.WithName(model.Name),
-		group.WithTenancy(metadata.Tenancy(model.Tenancy)),
-		group.WithCreatedAt(model.CreatedAt),
-		group.WithDeletedAt(model.DeletedAt),
+		group.WithID(group.ID(groupModel.ID)),
+		group.WithVersion(groupModel.Version),
+		group.WithName(groupModel.Name),
+		group.WithMembers(memberIDs),
+		group.WithTenancy(metadata.Tenancy(groupModel.Tenancy)),
+		group.WithCreatedAt(groupModel.CreatedAt),
+		group.WithDeletedAt(groupModel.DeletedAt),
 	)
 }

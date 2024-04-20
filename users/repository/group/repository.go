@@ -54,5 +54,5 @@ func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Grou
 		return nil, err
 	}
 
-	return ToEntity(groupModel)
+	return ToEntity(groupModel, []GroupMemberModel{})
 }
