@@ -72,7 +72,7 @@ func (r *repository) Save(ctx context.Context, group group.Group) error {
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Group, error) {
