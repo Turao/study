@@ -141,3 +141,15 @@ func (s *server) GetGroup(ctx context.Context, req *proto.GetGroupRequest) (*pro
 		Group: groupInfo,
 	}, nil
 }
+
+func (s *server) UpdateMembers(ctx context.Context, req *proto.UpdateMembersRequest) (*proto.UpdateMembersResponse, error) {
+	_, err := s.groupService.UpdateMembers(ctx, apiV1.UpdateMembersRequest{
+		GroupID:   req.GetGroupId(),
+		MemberIDs: req.GetMemberIds(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.UpdateMembersResponse{}, nil
+}

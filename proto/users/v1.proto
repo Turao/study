@@ -49,6 +49,7 @@ service Groups {
     rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
     rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse) {}
     rpc GetGroup(GetGroupRequest) returns (GetGroupResponse) {}
+    rpc UpdateMembers(UpdateMembersRequest) returns (UpdateMembersResponse) {}
 }
 
 message CreateGroupRequest {
@@ -81,3 +82,10 @@ message GroupInfo {
     google.protobuf.Timestamp created_at = 4;
     optional google.protobuf.Timestamp deleted_at = 5;
 }
+
+message UpdateMembersRequest {
+    string group_id = 1;
+    repeated string member_ids = 2;
+}
+
+message UpdateMembersResponse {}

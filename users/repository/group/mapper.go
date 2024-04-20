@@ -36,7 +36,7 @@ func ToGroupMemberModels(group group.Group) ([]*GroupMemberModel, error) {
 func ToEntity(groupModel GroupModel, groupMemberModels []GroupMemberModel) (group.Group, error) {
 	memberIDs := make(map[group.MemberID]struct{})
 	for _, groupMemberModel := range groupMemberModels {
-		if groupMemberModel.GroupID != groupMemberModel.GroupID || groupMemberModel.GroupVersion != groupModel.Version {
+		if groupMemberModel.GroupID != groupModel.ID || groupMemberModel.GroupVersion != groupModel.Version {
 			continue // skip
 		}
 		memberID := group.MemberID(groupMemberModel.MemberID)
