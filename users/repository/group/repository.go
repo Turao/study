@@ -27,7 +27,7 @@ func NewRepository(database *sqlx.DB) (*repository, error) {
 }
 
 func (r *repository) Save(ctx context.Context, group group.Group) error {
-	model, err := ToModel(group)
+	groupModel, err := ToGroupModel(group)
 	if err != nil {
 		return err
 	}
@@ -36,17 +36,17 @@ func (r *repository) Save(ctx context.Context, group group.Group) error {
 		ctx,
 		`INSERT INTO groups (id, version, name, tenancy, created_at, deleted_at)
 		VALUES (:id, :version, :name, :tenancy, :created_at, :deleted_at)`,
-		model,
+		groupModel,
 	)
 
 	return err
 }
 
 func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Group, error) {
-	var model Model
+	var groupModel GroupModel
 	err := r.database.GetContext(
 		ctx,
-		&model,
+		&groupModel,
 		"SELECT * FROM groups WHERE id = $1 ORDER BY version DESC LIMIT 1",
 		groupID,
 	)
@@ -54,5 +54,5 @@ func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Grou
 		return nil, err
 	}
 
-	return ToEntity(model)
+	return ToEntity(groupModel)
 }

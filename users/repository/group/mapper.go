@@ -5,8 +5,8 @@ import (
 	"github.com/turao/topics/users/entity/group"
 )
 
-func ToModel(group group.Group) (*Model, error) {
-	model := &Model{
+func ToGroupModel(group group.Group) (*GroupModel, error) {
+	groupModel := &GroupModel{
 		ID:        group.ID().String(),
 		Version:   group.Version(),
 		Name:      group.Name(),
@@ -15,10 +15,25 @@ func ToModel(group group.Group) (*Model, error) {
 		DeletedAt: group.DeletedAt(),
 	}
 
-	return model, nil
+	return groupModel, nil
 }
 
-func ToEntity(model Model) (group.Group, error) {
+func ToGroupMemberModels(group group.Group) ([]*GroupMemberModel, error) {
+	groupMemberModels := []*GroupMemberModel{}
+	for memberID := range group.Members() {
+		groupMemberModels = append(
+			groupMemberModels,
+			&GroupMemberModel{
+				GroupID:      group.ID().String(),
+				GroupVersion: group.Version(),
+				MemberID:     string(memberID),
+			},
+		)
+	}
+	return groupMemberModels, nil
+}
+
+func ToEntity(model GroupModel) (group.Group, error) {
 	return group.NewGroup(
 		group.WithID(group.ID(model.ID)),
 		group.WithVersion(model.Version),
