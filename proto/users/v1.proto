@@ -44,3 +44,40 @@ message UserInfo {
     google.protobuf.Timestamp created_at = 6;
     optional google.protobuf.Timestamp deleted_at = 7;
 }
+
+service Groups {
+    rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
+    rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse) {}
+    rpc GetGroup(GetGroupRequest) returns (GetGroupResponse) {}
+}
+
+message CreateGroupRequest {
+    string name = 1;
+    string tenancy = 2; 
+}
+
+message CreateGroupResponse {
+    string id = 1;
+}
+
+message DeleteGroupRequest {
+    string id = 1;
+}
+
+message DeleteGroupResponse {}
+
+message GetGroupRequest {
+    string id = 1;
+}
+
+message GetGroupResponse {
+    GroupInfo group = 1;
+}
+
+message GroupInfo {
+    string id = 1;
+    string name = 2;
+    string tenancy = 3;
+    google.protobuf.Timestamp created_at = 4;
+    optional google.protobuf.Timestamp deleted_at = 5;
+}

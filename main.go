@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
@@ -17,9 +16,10 @@ import (
 	"github.com/turao/topics/lib/grpc/interceptor"
 
 	userspb "github.com/turao/topics/proto/users"
-	usersV1 "github.com/turao/topics/users/api/v1"
+	grouprepository "github.com/turao/topics/users/repository/group"
 	userrepository "github.com/turao/topics/users/repository/user"
 	usersserver "github.com/turao/topics/users/server"
+	groupservice "github.com/turao/topics/users/service/group"
 	userservice "github.com/turao/topics/users/service/user"
 )
 
@@ -58,27 +58,24 @@ func users() {
 		log.Fatalln(err)
 	}
 
-	repository, err := userrepository.NewRepository(database)
+	userRepository, err := userrepository.NewRepository(database)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	service, err := userservice.NewService(repository)
+	userService, err := userservice.NewService(userRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = service.RegisterUser(
-		context.Background(),
-		usersV1.RegisteUserRequest{
-			Email:     "example@domain.com",
-			FirstName: "john",
-			LastName:  "cleese",
-			Tenancy:   "tenancy/test",
-		},
-	)
+	groupRepository, err := grouprepository.NewRepository(database)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+	}
+
+	groupService, err := groupservice.NewService(groupRepository)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	registrar := grpc.NewServer(
@@ -98,11 +95,15 @@ func users() {
 		}
 	}()
 
-	server, err := usersserver.NewServer(service)
+	server, err := usersserver.NewServer(
+		userService,
+		groupService,
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	userspb.RegisterUsersServer(registrar, server)
+	userspb.RegisterGroupsServer(registrar, server)
 	reflection.Register(registrar)
 
 	if err := registrar.Serve(listener); err != nil {

@@ -10,20 +10,27 @@ import (
 
 type server struct {
 	proto.UnimplementedUsersServer
-	service apiV1.Users
+	proto.UnimplementedGroupsServer
+	userService  apiV1.Users
+	groupService apiV1.Groups
 }
 
 var _ proto.UsersServer = (*server)(nil)
+var _ proto.GroupsServer = (*server)(nil)
 
-func NewServer(service apiV1.Users) (*server, error) {
+func NewServer(
+	userService apiV1.Users,
+	groupService apiV1.Groups,
+) (*server, error) {
 	return &server{
-		service: service,
+		userService:  userService,
+		groupService: groupService,
 	}, nil
 }
 
 // RegisterUser ...
 func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
-	res, err := s.service.RegisterUser(ctx, apiV1.RegisteUserRequest{
+	res, err := s.userService.RegisterUser(ctx, apiV1.RegisteUserRequest{
 		Email:     req.GetEmail(),
 		FirstName: req.GetFirstName(),
 		LastName:  req.GetLastName(),
@@ -40,7 +47,7 @@ func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserReques
 
 // DeleteUser ...
 func (s *server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
-	_, err := s.service.DeleteUser(ctx, apiV1.DeleteUserRequest{
+	_, err := s.userService.DeleteUser(ctx, apiV1.DeleteUserRequest{
 		ID: req.GetId(),
 	})
 	if err != nil {
@@ -52,7 +59,7 @@ func (s *server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (
 
 // GetUserInfo ...
 func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest) (*proto.GetUserInfoResponse, error) {
-	res, err := s.service.GetUserInfo(ctx, apiV1.GetUserInfoRequest{
+	res, err := s.userService.GetUserInfo(ctx, apiV1.GetUserInfoRequest{
 		ID: req.GetId(),
 	})
 	if err != nil {
@@ -81,5 +88,56 @@ func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest)
 			CreatedAt: userInfo.CreatedAt,
 			DeletedAt: userInfo.DeletedAt,
 		},
+	}, nil
+}
+
+// CreateGroup implements users.GroupsServer.
+func (s *server) CreateGroup(ctx context.Context, req *proto.CreateGroupRequest) (*proto.CreateGroupResponse, error) {
+	res, err := s.groupService.CreateGroup(ctx, apiV1.CreateGroupRequest{
+		Name:    req.GetName(),
+		Tenancy: req.GetTenancy(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.CreateGroupResponse{
+		Id: res.ID,
+	}, nil
+}
+
+// DeleteGroup implements users.GroupsServer.
+func (s *server) DeleteGroup(ctx context.Context, req *proto.DeleteGroupRequest) (*proto.DeleteGroupResponse, error) {
+	_, err := s.groupService.DeleteGroup(ctx, apiV1.DeleteGroupRequest{
+		ID: req.GetId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.DeleteGroupResponse{}, nil
+}
+
+// GetGroup implements users.GroupsServer.
+func (s *server) GetGroup(ctx context.Context, req *proto.GetGroupRequest) (*proto.GetGroupResponse, error) {
+	res, err := s.groupService.GetGroup(ctx, apiV1.GetGroupRequest{
+		ID: req.GetId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	groupInfo := &proto.GroupInfo{
+		Id:        res.Group.ID,
+		Name:      res.Group.Name,
+		Tenancy:   res.Group.Tenancy,
+		CreatedAt: timestamppb.New(res.Group.CreatedAt),
+	}
+	if res.Group.DeletedAt != nil {
+		groupInfo.DeletedAt = timestamppb.New(*res.Group.DeletedAt)
+	}
+
+	return &proto.GetGroupResponse{
+		Group: groupInfo,
 	}, nil
 }
