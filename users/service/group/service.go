@@ -9,6 +9,7 @@ import (
 	"github.com/turao/topics/users/entity/group"
 )
 
+// GroupRepository ...
 type GroupRepository interface {
 	Save(ctx context.Context, group group.Group) error
 	FindByID(ctx context.Context, groupID group.ID) (group.Group, error)
@@ -20,6 +21,7 @@ type service struct {
 
 var _ apiV1.Groups = (*service)(nil)
 
+// NewService ...
 func NewService(
 	groupRepository GroupRepository,
 ) (*service, error) {
@@ -28,7 +30,7 @@ func NewService(
 	}, nil
 }
 
-// RegisterGroup implements apiV1.Groups
+// CreateGroup ...
 func (svc *service) CreateGroup(ctx context.Context, req apiV1.CreateGroupRequest) (apiV1.CreateGroupResponse, error) {
 	log.Println("creating group", req)
 	group, err := group.NewGroup(
@@ -50,6 +52,7 @@ func (svc *service) CreateGroup(ctx context.Context, req apiV1.CreateGroupReques
 	}, nil
 }
 
+// DeleteGroup ...
 func (svc *service) DeleteGroup(ctx context.Context, req apiV1.DeleteGroupRequest) (apiV1.DeleteGroupResponse, error) {
 	log.Println("deleting group", req)
 	group, err := svc.groupRepository.FindByID(ctx, group.ID(req.ID))
@@ -81,4 +84,9 @@ func (svc *service) GetGroup(ctx context.Context, req apiV1.GetGroupRequest) (ap
 	return apiV1.GetGroupResponse{
 		Group: groupInfo,
 	}, nil
+}
+
+// UpdateMembers ...
+func (svc *service) UpdateMembers(ctx context.Context, req apiV1.UpdateMembersRequest) (apiV1.UpdateMembersResponse, error) {
+	panic("unimplemented")
 }

@@ -9,6 +9,8 @@ type Groups interface {
 	CreateGroup(ctx context.Context, req CreateGroupRequest) (CreateGroupResponse, error)
 	DeleteGroup(ctx context.Context, req DeleteGroupRequest) (DeleteGroupResponse, error)
 	GetGroup(ctx context.Context, req GetGroupRequest) (GetGroupResponse, error)
+
+	UpdateMembers(ctx context.Context, req UpdateMembersRequest) (UpdateMembersResponse, error)
 }
 
 type CreateGroupRequest struct {
@@ -41,3 +43,10 @@ type GroupInfo struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
 }
+
+type UpdateMembersRequest struct {
+	GroupID   string   `json:"groupId"`
+	MemberIDs []string `json:"memberIds"`
+}
+
+type UpdateMembersResponse struct{}

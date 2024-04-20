@@ -73,3 +73,10 @@ func WithDeletedAt(deletedAt *time.Time) GroupOption {
 		return nil
 	}
 }
+
+func WithMembers(memberIDs map[MemberID]struct{}) GroupOption {
+	return func(g *group) error {
+		g.members = memberIDs
+		return nil
+	}
+}
