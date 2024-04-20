@@ -50,6 +50,7 @@ func (r *repository) Save(ctx context.Context, group group.Group) error {
 		groupModel,
 	)
 	if err != nil {
+		transaction.Rollback()
 		return err
 	}
 
@@ -61,6 +62,7 @@ func (r *repository) Save(ctx context.Context, group group.Group) error {
 			groupMemberModel,
 		)
 		if err != nil {
+			transaction.Rollback()
 			return err
 		}
 	}
