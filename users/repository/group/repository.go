@@ -87,5 +87,17 @@ func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Grou
 		return nil, err
 	}
 
-	return ToEntity(groupModel, []GroupMemberModel{})
+	var groupMemberModels []GroupMemberModel
+	err = r.database.SelectContext(
+		ctx,
+		&groupMemberModels,
+		"SELECT * FROM group_member WHERE group_id = $1 AND group_version = $2",
+		groupModel.ID,
+		groupModel.Version,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToEntity(groupModel, groupMemberModels)
 }

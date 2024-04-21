@@ -94,12 +94,12 @@ func (svc *service) UpdateMembers(ctx context.Context, req apiV1.UpdateMembersRe
 		return apiV1.UpdateMembersResponse{}, err
 	}
 
-	members := make(map[groupentity.MemberID]struct{}, len(req.MemberIDs))
+	newMembers := make(map[groupentity.MemberID]struct{}, len(req.MemberIDs))
 	for _, memberID := range req.MemberIDs {
-		members[groupentity.MemberID(memberID)] = struct{}{}
+		newMembers[groupentity.MemberID(memberID)] = struct{}{}
 	}
 
-	group.SetMembers(members)
+	group.SetMembers(newMembers)
 
 	err = svc.groupRepository.Save(ctx, group)
 	if err != nil {

@@ -22,6 +22,7 @@ type Group interface {
 	Name() string
 	Members() map[MemberID]struct{}
 	SetMembers(members map[MemberID]struct{})
+
 	metadata.Auditable
 	metadata.Deletable
 	metadata.MultiTenant
