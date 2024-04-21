@@ -37,11 +37,16 @@ type GetGroupResponse struct {
 }
 
 type GroupInfo struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	Tenancy   string     `json:"tenancy"`
-	CreatedAt time.Time  `json:"createdAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	ID        string       `json:"id"`
+	Name      string       `json:"name"`
+	Members   []MemberInfo `json:"members"`
+	Tenancy   string       `json:"tenancy"`
+	CreatedAt time.Time    `json:"createdAt"`
+	DeletedAt *time.Time   `json:"deletedAt"`
+}
+
+type MemberInfo struct {
+	ID string `json:"id"`
 }
 
 type UpdateMembersRequest struct {

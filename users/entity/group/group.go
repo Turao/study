@@ -9,9 +9,14 @@ import (
 )
 
 type ID string
-type MemberID string
 
 func (id ID) String() string {
+	return string(id)
+}
+
+type MemberID string
+
+func (id MemberID) String() string {
 	return string(id)
 }
 

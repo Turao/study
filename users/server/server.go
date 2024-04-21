@@ -127,9 +127,21 @@ func (s *server) GetGroup(ctx context.Context, req *proto.GetGroupRequest) (*pro
 		return nil, err
 	}
 
+	members := res.Group.Members
+	memberInfos := make([]*proto.MemberInfo, 0, len(members))
+	for _, member := range members {
+		memberInfos = append(
+			memberInfos,
+			&proto.MemberInfo{
+				Id: member.ID,
+			},
+		)
+	}
+
 	groupInfo := &proto.GroupInfo{
 		Id:        res.Group.ID,
 		Name:      res.Group.Name,
+		Members:   memberInfos,
 		Tenancy:   res.Group.Tenancy,
 		CreatedAt: timestamppb.New(res.Group.CreatedAt),
 	}
