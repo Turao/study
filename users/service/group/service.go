@@ -6,14 +6,13 @@ import (
 
 	"github.com/turao/topics/metadata"
 	apiV1 "github.com/turao/topics/users/api/v1"
-	"github.com/turao/topics/users/entity/group"
 	groupentity "github.com/turao/topics/users/entity/group"
 )
 
 // GroupRepository ...
 type GroupRepository interface {
-	Save(ctx context.Context, group group.Group) error
-	FindByID(ctx context.Context, groupID group.ID) (group.Group, error)
+	Save(ctx context.Context, group groupentity.Group) error
+	FindByID(ctx context.Context, groupID groupentity.ID) (groupentity.Group, error)
 }
 
 type service struct {
@@ -56,7 +55,7 @@ func (svc *service) CreateGroup(ctx context.Context, req apiV1.CreateGroupReques
 // DeleteGroup ...
 func (svc *service) DeleteGroup(ctx context.Context, req apiV1.DeleteGroupRequest) (apiV1.DeleteGroupResponse, error) {
 	log.Println("deleting group", req)
-	group, err := svc.groupRepository.FindByID(ctx, group.ID(req.ID))
+	group, err := svc.groupRepository.FindByID(ctx, groupentity.ID(req.ID))
 	if err != nil {
 		return apiV1.DeleteGroupResponse{}, err
 	}
@@ -72,7 +71,7 @@ func (svc *service) DeleteGroup(ctx context.Context, req apiV1.DeleteGroupReques
 }
 
 func (svc *service) GetGroup(ctx context.Context, req apiV1.GetGroupRequest) (apiV1.GetGroupResponse, error) {
-	group, err := svc.groupRepository.FindByID(ctx, group.ID(req.ID))
+	group, err := svc.groupRepository.FindByID(ctx, groupentity.ID(req.ID))
 	if err != nil {
 		return apiV1.GetGroupResponse{}, err
 	}
