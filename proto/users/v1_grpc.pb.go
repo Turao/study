@@ -184,6 +184,7 @@ type GroupsClient interface {
 	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*DeleteGroupResponse, error)
 	GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*GetGroupResponse, error)
 	UpdateMembers(ctx context.Context, in *UpdateMembersRequest, opts ...grpc.CallOption) (*UpdateMembersResponse, error)
+	GetMemberGroups(ctx context.Context, in *GetMemberGroupsRequest, opts ...grpc.CallOption) (*GetMemberGroupsResponse, error)
 }
 
 type groupsClient struct {
@@ -230,6 +231,15 @@ func (c *groupsClient) UpdateMembers(ctx context.Context, in *UpdateMembersReque
 	return out, nil
 }
 
+func (c *groupsClient) GetMemberGroups(ctx context.Context, in *GetMemberGroupsRequest, opts ...grpc.CallOption) (*GetMemberGroupsResponse, error) {
+	out := new(GetMemberGroupsResponse)
+	err := c.cc.Invoke(ctx, "/Groups/GetMemberGroups", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupsServer is the server API for Groups service.
 // All implementations must embed UnimplementedGroupsServer
 // for forward compatibility
@@ -238,6 +248,7 @@ type GroupsServer interface {
 	DeleteGroup(context.Context, *DeleteGroupRequest) (*DeleteGroupResponse, error)
 	GetGroup(context.Context, *GetGroupRequest) (*GetGroupResponse, error)
 	UpdateMembers(context.Context, *UpdateMembersRequest) (*UpdateMembersResponse, error)
+	GetMemberGroups(context.Context, *GetMemberGroupsRequest) (*GetMemberGroupsResponse, error)
 	mustEmbedUnimplementedGroupsServer()
 }
 
@@ -256,6 +267,9 @@ func (UnimplementedGroupsServer) GetGroup(context.Context, *GetGroupRequest) (*G
 }
 func (UnimplementedGroupsServer) UpdateMembers(context.Context, *UpdateMembersRequest) (*UpdateMembersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMembers not implemented")
+}
+func (UnimplementedGroupsServer) GetMemberGroups(context.Context, *GetMemberGroupsRequest) (*GetMemberGroupsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMemberGroups not implemented")
 }
 func (UnimplementedGroupsServer) mustEmbedUnimplementedGroupsServer() {}
 
@@ -342,6 +356,24 @@ func _Groups_UpdateMembers_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Groups_GetMemberGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMemberGroupsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupsServer).GetMemberGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Groups/GetMemberGroups",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupsServer).GetMemberGroups(ctx, req.(*GetMemberGroupsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Groups_ServiceDesc is the grpc.ServiceDesc for Groups service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -364,6 +396,10 @@ var Groups_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMembers",
 			Handler:    _Groups_UpdateMembers_Handler,
+		},
+		{
+			MethodName: "GetMemberGroups",
+			Handler:    _Groups_GetMemberGroups_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

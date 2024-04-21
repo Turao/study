@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/turao/topics/users/entity/group"
+	groupentity "github.com/turao/topics/users/entity/group"
 )
 
 var (
@@ -27,7 +27,7 @@ func NewRepository(database *sqlx.DB) (*repository, error) {
 	}, nil
 }
 
-func (r *repository) Save(ctx context.Context, group group.Group) error {
+func (r *repository) Save(ctx context.Context, group groupentity.Group) error {
 	groupModel, err := ToGroupModel(group)
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func (r *repository) Save(ctx context.Context, group group.Group) error {
 	return nil
 }
 
-func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Group, error) {
+func (r *repository) FindByID(ctx context.Context, groupID groupentity.ID) (groupentity.Group, error) {
 	var groupModel GroupModel
 	err := r.database.GetContext(
 		ctx,
@@ -100,4 +100,35 @@ func (r *repository) FindByID(ctx context.Context, groupID group.ID) (group.Grou
 	}
 
 	return ToEntity(groupModel, groupMemberModels)
+}
+
+func (r *repository) FindByMemberID(ctx context.Context, memberID groupentity.MemberID) (map[groupentity.ID]struct{}, error) {
+	var groupMemberModels []GroupMemberModel
+	err := r.database.SelectContext(
+		ctx,
+		&groupMemberModels,
+		`
+		WITH latest_group_version AS (
+			SELECT id, max(version) as version 
+			FROM groups GROUP BY id
+		)
+		
+		SELECT gm.*
+		FROM group_member gm
+		JOIN latest_group_version g ON g.id = gm.group_id AND g.version = gm.group_version
+		WHERE gm.member_id = $1
+		`,
+		memberID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	groupIDs := make(map[groupentity.ID]struct{}, len(groupMemberModels))
+	for _, groupMemberModel := range groupMemberModels {
+		groupID := groupentity.ID(groupMemberModel.GroupID)
+		groupIDs[groupID] = struct{}{}
+	}
+
+	return groupIDs, nil
 }

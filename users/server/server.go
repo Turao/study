@@ -165,3 +165,27 @@ func (s *server) UpdateMembers(ctx context.Context, req *proto.UpdateMembersRequ
 
 	return &proto.UpdateMembersResponse{}, nil
 }
+
+func (s *server) GetMemberGroups(ctx context.Context, req *proto.GetMemberGroupsRequest) (*proto.GetMemberGroupsResponse, error) {
+	res, err := s.groupService.GetMemberGroups(ctx, apiV1.GetMemberGroupsRequest{
+		MemberID: req.GetMemberId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	groups := res.Groups
+	memberGroupInfos := make([]*proto.MemberGroupInfo, 0, len(groups))
+	for _, group := range groups {
+		memberGroupInfos = append(
+			memberGroupInfos,
+			&proto.MemberGroupInfo{
+				Id: group.ID,
+			},
+		)
+	}
+	return &proto.GetMemberGroupsResponse{
+		MemberId: req.GetMemberId(),
+		Groups:   memberGroupInfos,
+	}, nil
+}

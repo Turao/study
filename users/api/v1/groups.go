@@ -11,6 +11,7 @@ type Groups interface {
 	GetGroup(ctx context.Context, req GetGroupRequest) (GetGroupResponse, error)
 
 	UpdateMembers(ctx context.Context, req UpdateMembersRequest) (UpdateMembersResponse, error)
+	GetMemberGroups(ctx context.Context, req GetMemberGroupsRequest) (GetMemberGroupsResponse, error)
 }
 
 type CreateGroupRequest struct {
@@ -55,3 +56,16 @@ type UpdateMembersRequest struct {
 }
 
 type UpdateMembersResponse struct{}
+
+type GetMemberGroupsRequest struct {
+	MemberID string `json:"memberId"`
+}
+
+type GetMemberGroupsResponse struct {
+	MemberID string            `json:"memberId"`
+	Groups   []MemberGroupInfo `json:"groups"`
+}
+
+type MemberGroupInfo struct {
+	ID string `json:"id"`
+}

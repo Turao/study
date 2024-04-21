@@ -49,7 +49,9 @@ service Groups {
     rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
     rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse) {}
     rpc GetGroup(GetGroupRequest) returns (GetGroupResponse) {}
+
     rpc UpdateMembers(UpdateMembersRequest) returns (UpdateMembersResponse) {}
+    rpc GetMemberGroups(GetMemberGroupsRequest) returns (GetMemberGroupsResponse) {}
 }
 
 message CreateGroupRequest {
@@ -94,3 +96,16 @@ message UpdateMembersRequest {
 }
 
 message UpdateMembersResponse {}
+
+message GetMemberGroupsRequest {
+    string member_id = 1;
+}
+
+message GetMemberGroupsResponse {
+    string member_id = 1;
+    repeated MemberGroupInfo groups = 2;
+}
+
+message MemberGroupInfo {
+    string id = 1;
+}

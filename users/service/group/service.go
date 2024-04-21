@@ -13,6 +13,7 @@ import (
 type GroupRepository interface {
 	Save(ctx context.Context, group groupentity.Group) error
 	FindByID(ctx context.Context, groupID groupentity.ID) (groupentity.Group, error)
+	FindByMemberID(ctx context.Context, memberID groupentity.MemberID) (map[groupentity.ID]struct{}, error)
 }
 
 type service struct {
@@ -106,4 +107,26 @@ func (svc *service) UpdateMembers(ctx context.Context, req apiV1.UpdateMembersRe
 	}
 
 	return apiV1.UpdateMembersResponse{}, nil
+}
+
+func (svc *service) GetMemberGroups(ctx context.Context, req apiV1.GetMemberGroupsRequest) (apiV1.GetMemberGroupsResponse, error) {
+	groupIDs, err := svc.groupRepository.FindByMemberID(ctx, groupentity.MemberID(req.MemberID))
+	if err != nil {
+		return apiV1.GetMemberGroupsResponse{}, err
+	}
+
+	memberGroupInfos := make([]apiV1.MemberGroupInfo, 0, len(groupIDs))
+	for groupID := range groupIDs {
+		memberGroupInfos = append(
+			memberGroupInfos,
+			apiV1.MemberGroupInfo{
+				ID: groupID.String(),
+			},
+		)
+	}
+
+	return apiV1.GetMemberGroupsResponse{
+		MemberID: req.MemberID,
+		Groups:   memberGroupInfos,
+	}, nil
 }
