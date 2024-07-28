@@ -6,12 +6,12 @@ import (
 )
 
 type Users interface {
-	RegisterUser(ctx context.Context, req RegisteUserRequest) (RegisterUserResponse, error)
+	RegisterUser(ctx context.Context, req RegisterUserRequest) (RegisterUserResponse, error)
 	DeleteUser(ctx context.Context, req DeleteUserRequest) (DeleteUserResponse, error)
 	GetUserInfo(ctx context.Context, req GetUserInfoRequest) (GetUserInfoResponse, error)
 }
 
-type RegisteUserRequest struct {
+type RegisterUserRequest struct {
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`

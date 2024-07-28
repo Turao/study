@@ -29,7 +29,7 @@ func NewService(
 }
 
 // RegisterUser implements apiV1.Users
-func (svc *service) RegisterUser(ctx context.Context, req apiV1.RegisteUserRequest) (apiV1.RegisterUserResponse, error) {
+func (svc *service) RegisterUser(ctx context.Context, req apiV1.RegisterUserRequest) (apiV1.RegisterUserResponse, error) {
 	log.Println("registering user", req)
 	user, err := user.NewUser(
 		user.WithEmail(req.Email),

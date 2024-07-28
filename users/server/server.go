@@ -30,7 +30,7 @@ func NewServer(
 
 // RegisterUser ...
 func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
-	res, err := s.userService.RegisterUser(ctx, apiV1.RegisteUserRequest{
+	res, err := s.userService.RegisterUser(ctx, apiV1.RegisterUserRequest{
 		Email:     req.GetEmail(),
 		FirstName: req.GetFirstName(),
 		LastName:  req.GetLastName(),
