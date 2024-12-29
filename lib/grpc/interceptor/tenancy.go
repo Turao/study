@@ -20,6 +20,7 @@ func WithTenancyInterceptor() grpc.UnaryServerInterceptor {
 		m, ok := grpcmetadata.FromIncomingContext(ctx)
 		if !ok {
 			ctx = context.WithValue(ctx, HeaderTenancy, metadata.TenancyTesting)
+			return handler(ctx, req)
 		}
 
 		values := m.Get(key)
@@ -32,8 +33,8 @@ func WithTenancyInterceptor() grpc.UnaryServerInterceptor {
 		if err != nil {
 			log.Println(err)
 		}
-		ctx = context.WithValue(ctx, HeaderTenancy, tenancy)
 
+		ctx = context.WithValue(ctx, HeaderTenancy, tenancy)
 		return handler(ctx, req)
 	}
 }
