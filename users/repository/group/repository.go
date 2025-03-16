@@ -96,6 +96,9 @@ func (r *repository) FindByID(ctx context.Context, groupID groupentity.ID) (grou
 		groupModel.Version,
 	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 

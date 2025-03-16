@@ -18,7 +18,8 @@ import (
 	userspb "github.com/turao/topics/proto/users"
 	grouprepository "github.com/turao/topics/users/repository/group"
 	userrepository "github.com/turao/topics/users/repository/user"
-	usersserver "github.com/turao/topics/users/server"
+	usersgrpcserver "github.com/turao/topics/users/server/grpc"
+	userswebserver "github.com/turao/topics/users/server/web"
 	groupservice "github.com/turao/topics/users/service/group"
 	userservice "github.com/turao/topics/users/service/user"
 )
@@ -95,7 +96,14 @@ func users() {
 		}
 	}()
 
-	server, err := usersserver.NewServer(
+	go func() {
+		userserver := userswebserver.NewServer(userService)
+		if err := userserver.ListenAndServe(); err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	server, err := usersgrpcserver.NewServer(
 		userService,
 		groupService,
 	)
