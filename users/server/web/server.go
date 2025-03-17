@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/turao/topics/lib/web/middleware"
 	apiV1 "github.com/turao/topics/users/api/v1"
 )
 
@@ -15,6 +16,11 @@ type server struct {
 
 func NewServer(userService apiV1.Users) *server {
 	router := mux.NewRouter()
+	headerValidator := middleware.HeaderValidator(
+		middleware.HeaderExists("x-user-uuid"),
+		middleware.HeaderExists("x-tenancy"),
+	)
+	router.Use(mux.MiddlewareFunc(headerValidator))
 
 	s := &server{
 		Server: &http.Server{
