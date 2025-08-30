@@ -7,6 +7,7 @@ STORAGE_CASSANDRA_DIR=${STORAGE_DIR}/cassandra
 STORAGE_CONNECTORS_DIR=${STORAGE_DIR}/debezium
 
 STORAGE_USERS_DIR=${STORAGE_POSTGRES_DIR}/users
+STORAGE_NOTIFICATIONS_DIR=${STORAGE_POSTGRES_DIR}/notifications
 
 # Infrastructure
 start-network:
@@ -34,6 +35,30 @@ migrate-down-storage-users:
 
 migrate-force-storage-users:
 	docker run -v ${STORAGE_USERS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
+
+# Storage - Notifications
+start-storage-notifications:
+	docker run -i --rm postgres cat /usr/share/postgresql/postgresql.conf.sample > ${STORAGE_NOTIFICATIONS_DIR}/postgresql.conf
+	echo 'wal_level = logical' >> ${STORAGE_NOTIFICATIONS_DIR}/postgresql.conf
+	docker run -it --rm --name storage-notifications \
+		--network global \
+		-v ${STORAGE_NOTIFICATIONS_DIR}/postgresql.conf:/etc/postgresql/postgresql.conf \
+		-p 5432:5432 \
+		-e POSTGRES_DB=database \
+		-e POSTGRES_USER=pguser \
+		-e POSTGRES_PASSWORD=pwd \
+		postgres \
+		-c 'config_file=/etc/postgresql/postgresql.conf'
+
+migrate-up-storage-notifications:
+	docker run -v ${STORAGE_NOTIFICATIONS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose up 1
+
+migrate-down-storage-notifications:
+	docker run -v ${STORAGE_NOTIFICATIONS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose down 1
+
+migrate-force-storage-notifications:
+	docker run -v ${STORAGE_NOTIFICATIONS_DIR}:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://pguser:pwd@localhost:5432/database?sslmode=disable -verbose force ${version}
+
 
 # Messaging
 start-zookeeper:
