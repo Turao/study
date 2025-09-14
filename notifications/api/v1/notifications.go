@@ -7,7 +7,16 @@ type Notifications interface {
 }
 
 type SendNotificationRequest struct {
-	NotificationType string `json:"type"`
+	Recipient        string                 `json:"recipient"`
+	NotificationType string                 `json:"notification_type"`
+	Metadata         map[string]interface{} `json:"metadata"`
+
+	// notification specific fields
+	PaymentSettled *PaymentSettled `json:"payment_settled"`
+}
+
+type PaymentSettled struct {
+	PaymentID string `json:"payment_id"`
 }
 
 type SendNotificationResponse struct {

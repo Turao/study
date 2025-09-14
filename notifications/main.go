@@ -10,7 +10,7 @@ import (
 	"github.com/turao/topics/config"
 	"github.com/turao/topics/notifications/api/v1"
 	notificationbuilder "github.com/turao/topics/notifications/builder"
-	"github.com/turao/topics/notifications/builder/confirmation"
+	paymentsettledbuilder "github.com/turao/topics/notifications/builder/paymentsettled"
 	notificationrepository "github.com/turao/topics/notifications/repository/notification"
 	notificationsender "github.com/turao/topics/notifications/sender"
 	notificationservice "github.com/turao/topics/notifications/service/notification"
@@ -50,7 +50,7 @@ func main() {
 
 	sender := notificationsender.NewSender()
 	builder := notificationbuilder.NewBuilder(
-		confirmation.NewBuilder(),
+		paymentsettledbuilder.NewBuilder(),
 	)
 	if err != nil {
 		log.Fatalln(err)
@@ -58,7 +58,14 @@ func main() {
 
 	service := notificationservice.NewService(builder, repository, sender)
 	response, err := service.SendNotification(context.Background(), api.SendNotificationRequest{
-		NotificationType: "confirmation",
+		NotificationType: "payment_settled",
+		Recipient:        "john@doe.com",
+		Metadata: map[string]interface{}{
+			"caller": "caller-name",
+		},
+		PaymentSettled: &api.PaymentSettled{
+			PaymentID: "payment-id",
+		},
 	})
 	if err != nil {
 		log.Fatalln(err)

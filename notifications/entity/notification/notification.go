@@ -8,13 +8,12 @@ type Notification struct {
 	Recipient string                 `json:"recipient"`
 	Subject   string                 `json:"subject"`
 	Content   map[string]interface{} `json:"content"`
+	Metadata  map[string]interface{} `json:"metadata"`
 	CreatedAt time.Time              `json:"created_at"`
-
-	ExternalReferenceID string `json:"external_reference_id"`
 }
 
 type Type string
 
 const (
-	TypeConfirmation Type = "confirmation"
+	TypePaymentSettled Type = "payment_settled"
 )

@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS notifications(
   type VARCHAR(256) NOT NULL,
   recipient VARCHAR(256),
   subject VARCHAR(256),
-  content VARCHAR(1024),
-  created_at TIMESTAMP,
-  external_reference_id VARCHAR(256)
+  content JSONB,
+  metadata VARCHAR(1024),
+  created_at TIMESTAMP
 );
 
 ALTER TABLE notifications ADD CONSTRAINT notifications_unique_id UNIQUE (id);

@@ -13,14 +13,19 @@ func ToModel(notification notification.Notification) (*Model, error) {
 		return nil, err
 	}
 
+	metadata, err := json.Marshal(notification.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Model{
-		ID:                  notification.ID,
-		Type:                notification.Type,
-		Recipient:           notification.Recipient,
-		Subject:             notification.Subject,
-		Content:             string(content),
-		CreatedAt:           notification.CreatedAt,
-		ExternalReferenceID: notification.ExternalReferenceID,
+		ID:        notification.ID,
+		Type:      notification.Type,
+		Recipient: notification.Recipient,
+		Subject:   notification.Subject,
+		Content:   string(content),
+		Metadata:  string(metadata),
+		CreatedAt: notification.CreatedAt,
 	}, nil
 }
 
@@ -32,13 +37,19 @@ func ToEntity(model Model) (*notification.Notification, error) {
 		return nil, err
 	}
 
+	var metadata map[string]interface{}
+	err = json.Unmarshal([]byte(model.Metadata), &metadata)
+	if err != nil {
+		return nil, err
+	}
+
 	return &notification.Notification{
-		ID:                  model.ID,
-		Type:                model.Type,
-		Recipient:           model.Recipient,
-		Subject:             model.Subject,
-		Content:             content,
-		CreatedAt:           model.CreatedAt,
-		ExternalReferenceID: model.ExternalReferenceID,
+		ID:        model.ID,
+		Type:      model.Type,
+		Recipient: model.Recipient,
+		Subject:   model.Subject,
+		Content:   content,
+		Metadata:  metadata,
+		CreatedAt: model.CreatedAt,
 	}, nil
 }

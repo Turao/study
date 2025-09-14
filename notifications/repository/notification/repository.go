@@ -32,15 +32,15 @@ func (r *repository) Save(ctx context.Context, notification notification.Notific
 
 	_, err = r.database.NamedExecContext(
 		ctx,
-		`INSERT INTO notifications (id, type, recipient, subject, content, created_at, external_reference_id) 
-		VALUES (:id, :type, :recipient, :subject, :content, :created_at, :external_reference_id)
+		`INSERT INTO notifications (id, type, recipient, subject, content, metadata, created_at) 
+		VALUES (:id, :type, :recipient, :subject, :content, :metadata, :created_at)
 		ON CONFLICT (id) DO UPDATE SET
 			type = :type,
 			recipient = :recipient,
 			subject = :subject,
 			content = :content,
-			created_at = :created_at,
-			external_reference_id = :external_reference_id`,
+			metadata = :metadata,
+			created_at = :created_at`,
 		model,
 	)
 	return err
