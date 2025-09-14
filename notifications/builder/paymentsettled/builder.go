@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/shopspring/decimal"
 	apiV1 "github.com/turao/topics/notifications/api/v1"
 	"github.com/turao/topics/notifications/entity/notification"
 )
@@ -46,7 +47,7 @@ func (b *builder) BuildNotification(ctx context.Context, request apiV1.SendNotif
 type paymentDetails struct {
 	PaymentID                  string
 	PayerID                    string
-	PriceE5                    int
+	PriceE5                    decimal.Decimal
 	PriceCurrency              string
 	PaymentMethodDisplayName   string
 	PaymentMethodDisplayNumber string
@@ -57,7 +58,7 @@ func (b *builder) fetchPaymentDetails(ctx context.Context, paymentID string) (*p
 	return &paymentDetails{
 		PaymentID:                  paymentID,
 		PayerID:                    "payer-id",
-		PriceE5:                    99900,
+		PriceE5:                    decimal.NewFromFloat(9.99),
 		PriceCurrency:              "USD",
 		PaymentMethodDisplayName:   "Apple Pay",
 		PaymentMethodDisplayNumber: "**** **** *234",
@@ -83,11 +84,11 @@ func (b *builder) buildContent(paymentDetails *paymentDetails, payerDetails *pay
 	return map[string]interface{}{
 		"payer_first_name":              payerDetails.FirstName,
 		"payer_last_name":               payerDetails.LastName,
-		"price_e5":                      paymentDetails.PriceE5,
+		"price":                         paymentDetails.PriceE5.StringFixed(2),
 		"price_currency":                paymentDetails.PriceCurrency,
 		"payment_method_display_name":   paymentDetails.PaymentMethodDisplayName,
 		"payment_method_display_number": paymentDetails.PaymentMethodDisplayNumber,
-		"billing_date_yyyy_mm_dd":       paymentDetails.BillingDate,
+		"billing_date_yyyy_mm_dd":       paymentDetails.BillingDate.Format(time.DateOnly),
 	}
 }
 
