@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// server is the implementation of the gRPC server
 type server struct {
 	proto.UnimplementedUsersServer
 	proto.UnimplementedGroupsServer
@@ -18,6 +19,7 @@ type server struct {
 var _ proto.UsersServer = (*server)(nil)
 var _ proto.GroupsServer = (*server)(nil)
 
+// NewServer creates a new gRPC server
 func NewServer(
 	userService apiV1.Users,
 	groupService apiV1.Groups,
@@ -28,7 +30,7 @@ func NewServer(
 	}, nil
 }
 
-// RegisterUser ...
+// RegisterUser handles the RegisterUser request
 func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserRequest) (*proto.RegisterUserResponse, error) {
 	res, err := s.userService.RegisterUser(ctx, apiV1.RegisterUserRequest{
 		Email:     req.GetEmail(),
@@ -45,7 +47,7 @@ func (s *server) RegisterUser(ctx context.Context, req *proto.RegisterUserReques
 	}, nil
 }
 
-// DeleteUser ...
+// DeleteUser handles the DeleteUser request
 func (s *server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (*proto.DeleteUserResponse, error) {
 	_, err := s.userService.DeleteUser(ctx, apiV1.DeleteUserRequest{
 		ID: req.GetId(),
@@ -57,7 +59,7 @@ func (s *server) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest) (
 	return &proto.DeleteUserResponse{}, nil
 }
 
-// GetUserInfo ...
+// GetUserInfo handles the GetUserInfo request
 func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest) (*proto.GetUserInfoResponse, error) {
 	res, err := s.userService.GetUserInfo(ctx, apiV1.GetUserInfoRequest{
 		ID: req.GetId(),
@@ -91,7 +93,7 @@ func (s *server) GetUserInfo(ctx context.Context, req *proto.GetUserInfoRequest)
 	}, nil
 }
 
-// CreateGroup implements users.GroupsServer.
+// CreateGroup handles the CreateGroup request
 func (s *server) CreateGroup(ctx context.Context, req *proto.CreateGroupRequest) (*proto.CreateGroupResponse, error) {
 	res, err := s.groupService.CreateGroup(ctx, apiV1.CreateGroupRequest{
 		Name:    req.GetName(),
@@ -106,7 +108,7 @@ func (s *server) CreateGroup(ctx context.Context, req *proto.CreateGroupRequest)
 	}, nil
 }
 
-// DeleteGroup implements users.GroupsServer.
+// DeleteGroup handles the DeleteGroup request
 func (s *server) DeleteGroup(ctx context.Context, req *proto.DeleteGroupRequest) (*proto.DeleteGroupResponse, error) {
 	_, err := s.groupService.DeleteGroup(ctx, apiV1.DeleteGroupRequest{
 		ID: req.GetId(),
@@ -118,7 +120,7 @@ func (s *server) DeleteGroup(ctx context.Context, req *proto.DeleteGroupRequest)
 	return &proto.DeleteGroupResponse{}, nil
 }
 
-// GetGroup implements users.GroupsServer.
+// GetGroup handles the GetGroup request
 func (s *server) GetGroup(ctx context.Context, req *proto.GetGroupRequest) (*proto.GetGroupResponse, error) {
 	res, err := s.groupService.GetGroup(ctx, apiV1.GetGroupRequest{
 		ID: req.GetId(),
@@ -154,6 +156,7 @@ func (s *server) GetGroup(ctx context.Context, req *proto.GetGroupRequest) (*pro
 	}, nil
 }
 
+// UpdateMembers handles the UpdateMembers request
 func (s *server) UpdateMembers(ctx context.Context, req *proto.UpdateMembersRequest) (*proto.UpdateMembersResponse, error) {
 	_, err := s.groupService.UpdateMembers(ctx, apiV1.UpdateMembersRequest{
 		GroupID:   req.GetGroupId(),
@@ -166,6 +169,7 @@ func (s *server) UpdateMembers(ctx context.Context, req *proto.UpdateMembersRequ
 	return &proto.UpdateMembersResponse{}, nil
 }
 
+// GetMemberGroups handles the GetMemberGroups request
 func (s *server) GetMemberGroups(ctx context.Context, req *proto.GetMemberGroupsRequest) (*proto.GetMemberGroupsResponse, error) {
 	res, err := s.groupService.GetMemberGroups(ctx, apiV1.GetMemberGroupsRequest{
 		MemberID: req.GetMemberId(),

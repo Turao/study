@@ -9,11 +9,13 @@ import (
 	apiV1 "github.com/turao/topics/users/api/v1"
 )
 
+// server is the implementation of the web server
 type server struct {
 	*http.Server
 	userService apiV1.Users
 }
 
+// NewServer creates a new web server
 func NewServer(userService apiV1.Users) *server {
 	router := mux.NewRouter()
 	headerValidator := middleware.HeaderValidator(
@@ -35,6 +37,7 @@ func NewServer(userService apiV1.Users) *server {
 	return s
 }
 
+// registerRoutes registers the routes for the web server
 func (s *server) registerRoutes(router *mux.Router) {
 	router.HandleFunc("/user/{id}", s.handleGetUserInfo).Methods("GET")
 	router.HandleFunc("/user/{id}", s.handleDeleteUser).Methods("DELETE")
@@ -42,6 +45,7 @@ func (s *server) registerRoutes(router *mux.Router) {
 	http.Handle("/", router)
 }
 
+// handleGetUserInfo handles the GET request for the user info
 func (s *server) handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -64,6 +68,7 @@ func (s *server) handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// handleRegisterUser handles the POST request for the user registration
 func (s *server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	var request apiV1.RegisterUserRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -88,6 +93,7 @@ func (s *server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// handleDeleteUser handles the DELETE request for the user deletion
 func (s *server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
