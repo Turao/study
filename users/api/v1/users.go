@@ -12,6 +12,11 @@ type Users interface {
 	GetUserInfo(ctx context.Context, req GetUserInfoRequest) (GetUserInfoResponse, error)
 }
 
+// UsersStream is the interface for the UsersStream service
+type UsersStream interface {
+	StreamUsers(ctx context.Context, req StreamUsersRequest) (StreamUsersResponse, error)
+}
+
 // RegisterUserRequest is the request for the RegisterUser method
 type RegisterUserRequest struct {
 	Email     string `json:"email"`
@@ -52,4 +57,12 @@ type UserInfo struct {
 	Tenancy   string     `json:"tenancy"`
 	CreatedAt time.Time  `json:"createdAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
+}
+
+// StreamUsersRequest is the request for the StreamUsers method
+type StreamUsersRequest struct{}
+
+// StreamUsersResponse is the response for the StreamUsers method
+type StreamUsersResponse struct {
+	Users <-chan UserInfo
 }
