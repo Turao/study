@@ -13,10 +13,12 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
+// repository is the implementation of the group repository
 type repository struct {
 	database *sqlx.DB
 }
 
+// NewRepository creates a new group repository
 func NewRepository(database *sqlx.DB) (*repository, error) {
 	if database == nil {
 		return nil, errors.New("database connection is nil")
@@ -27,6 +29,7 @@ func NewRepository(database *sqlx.DB) (*repository, error) {
 	}, nil
 }
 
+// Save saves a Group entity
 func (r *repository) Save(ctx context.Context, group groupentity.Group) error {
 	groupModel, err := ToGroupModel(group)
 	if err != nil {
@@ -75,6 +78,7 @@ func (r *repository) Save(ctx context.Context, group groupentity.Group) error {
 	return nil
 }
 
+// FindByID finds a Group by its ID
 func (r *repository) FindByID(ctx context.Context, groupID groupentity.ID) (groupentity.Group, error) {
 	var groupModel GroupModel
 	err := r.database.GetContext(
@@ -105,6 +109,7 @@ func (r *repository) FindByID(ctx context.Context, groupID groupentity.ID) (grou
 	return ToEntity(groupModel, groupMemberModels)
 }
 
+// FindByMemberID finds a Group by its member ID
 func (r *repository) FindByMemberID(ctx context.Context, memberID groupentity.MemberID) (map[groupentity.ID]struct{}, error) {
 	var groupMemberModels []GroupMemberModel
 	err := r.database.SelectContext(

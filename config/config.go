@@ -1,11 +1,13 @@
 package config
 
+// CassandraConfig is the configuration for the Cassandra database
 type CassandraConfig struct {
 	Host     string
 	Port     int
 	Keyspace string
 }
 
+// PostgresConfig is the configuration for the Postgres database
 type PostgresConfig struct {
 	Host     string
 	Port     int
@@ -14,6 +16,7 @@ type PostgresConfig struct {
 	Password string
 }
 
+// MySQLConfig is the configuration for the MySQL database
 type MySQLConfig struct {
 	Host     string
 	Port     int
@@ -22,6 +25,7 @@ type MySQLConfig struct {
 	Password string
 }
 
+// SurrealDBConfig is the configuration for the SurrealDB database
 type SurrealDBConfig struct {
 	Host      string
 	Port      int
@@ -31,6 +35,7 @@ type SurrealDBConfig struct {
 	Password  string
 }
 
+// Users is the configuration for the Users service
 type Users struct {
 	DatabaseConfig PostgresConfig
 }

@@ -14,6 +14,7 @@ func isAlpha(str string) bool {
 	return alpha.MatchString(str)
 }
 
+// UserOption is the option for the user entity
 type UserOption func(*user) error
 
 func WithID(id ID) UserOption {
@@ -26,6 +27,7 @@ func WithID(id ID) UserOption {
 	}
 }
 
+// WithVersion sets the user version
 func WithVersion(version uint32) UserOption {
 	return func(u *user) error {
 		u.version = version
@@ -33,6 +35,7 @@ func WithVersion(version uint32) UserOption {
 	}
 }
 
+// WithEmail sets the user email
 func WithEmail(email string) UserOption {
 	return func(u *user) error {
 		if email == "" {
@@ -43,6 +46,7 @@ func WithEmail(email string) UserOption {
 	}
 }
 
+// WithFirstName sets the user first name
 func WithFirstName(firstName string) UserOption {
 	return func(u *user) error {
 		if !isAlpha(firstName) {
@@ -53,6 +57,7 @@ func WithFirstName(firstName string) UserOption {
 	}
 }
 
+// WithLastName sets the user last name
 func WithLastName(lastName string) UserOption {
 	return func(u *user) error {
 		if !isAlpha(lastName) {
@@ -63,6 +68,7 @@ func WithLastName(lastName string) UserOption {
 	}
 }
 
+// WithTenancy sets the user tenancy
 func WithTenancy(tenancy metadata.Tenancy) UserOption {
 	return func(u *user) error {
 		if tenancy != metadata.TenancyTesting && tenancy != metadata.TenancyProduction {
@@ -73,6 +79,7 @@ func WithTenancy(tenancy metadata.Tenancy) UserOption {
 	}
 }
 
+// WithCreatedAt sets the user created at
 func WithCreatedAt(createdAt time.Time) UserOption {
 	return func(u *user) error {
 		if createdAt.After(time.Now()) {
@@ -83,6 +90,7 @@ func WithCreatedAt(createdAt time.Time) UserOption {
 	}
 }
 
+// WithDeletedAt sets the user deleted at
 func WithDeletedAt(deletedAt *time.Time) UserOption {
 	return func(u *user) error {
 		if deletedAt != nil && deletedAt.Before(u.createdAt) {

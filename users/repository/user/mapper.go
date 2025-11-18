@@ -5,6 +5,7 @@ import (
 	"github.com/turao/topics/users/entity/user"
 )
 
+// ToModel converts a User entity to a Model
 func ToModel(user user.User) (*Model, error) {
 	model := &Model{
 		ID:        user.ID().String(),
@@ -20,6 +21,7 @@ func ToModel(user user.User) (*Model, error) {
 	return model, nil
 }
 
+// ToEntity converts a Model to a User entity
 func ToEntity(model Model) (user.User, error) {
 	return user.NewUser(
 		user.WithID(user.ID(model.ID)),

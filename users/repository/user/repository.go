@@ -13,10 +13,12 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
+// repository is the implementation of the user repository
 type repository struct {
 	database *sqlx.DB
 }
 
+// NewRepository creates a new user repository
 func NewRepository(database *sqlx.DB) (*repository, error) {
 	if database == nil {
 		return nil, errors.New("database connection is nil")
@@ -27,6 +29,7 @@ func NewRepository(database *sqlx.DB) (*repository, error) {
 	}, nil
 }
 
+// Save saves a User entity
 func (r *repository) Save(ctx context.Context, user user.User) error {
 	model, err := ToModel(user)
 	if err != nil {
@@ -43,6 +46,7 @@ func (r *repository) Save(ctx context.Context, user user.User) error {
 	return err
 }
 
+// FindByID finds a User by its ID
 func (r *repository) FindByID(ctx context.Context, userID user.ID) (user.User, error) {
 	var model Model
 	err := r.database.GetContext(

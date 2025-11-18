@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// GroupModel is the model for the group entity
 type GroupModel struct {
 	Key       string     `db:"_key"`
 	ID        string     `db:"id"`
@@ -14,6 +15,7 @@ type GroupModel struct {
 	DeletedAt *time.Time `db:"deleted_at"`
 }
 
+// GroupMemberModel is the model for the group member entity
 type GroupMemberModel struct {
 	Key          string `db:"_key"`
 	GroupID      string `db:"group_id"`

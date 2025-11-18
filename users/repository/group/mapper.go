@@ -5,6 +5,7 @@ import (
 	"github.com/turao/topics/users/entity/group"
 )
 
+// ToGroupModel converts a Group entity to a GroupModel
 func ToGroupModel(group group.Group) (*GroupModel, error) {
 	groupModel := &GroupModel{
 		ID:        group.ID().String(),
@@ -18,6 +19,7 @@ func ToGroupModel(group group.Group) (*GroupModel, error) {
 	return groupModel, nil
 }
 
+// ToGroupMemberModels converts a Group entity to a GroupMemberModel
 func ToGroupMemberModels(group group.Group) ([]*GroupMemberModel, error) {
 	groupMemberModels := []*GroupMemberModel{}
 	for memberID := range group.Members() {
@@ -33,6 +35,7 @@ func ToGroupMemberModels(group group.Group) ([]*GroupMemberModel, error) {
 	return groupMemberModels, nil
 }
 
+// ToEntity converts a GroupModel and a GroupMemberModel to a Group entity
 func ToEntity(groupModel GroupModel, groupMemberModels []GroupMemberModel) (group.Group, error) {
 	memberIDs := make(map[group.MemberID]struct{})
 	for _, groupMemberModel := range groupMemberModels {

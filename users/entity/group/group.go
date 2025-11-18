@@ -8,18 +8,23 @@ import (
 	"github.com/turao/topics/metadata"
 )
 
+// ID is the type for the group ID
 type ID string
 
+// String is the string representation of the group ID
 func (id ID) String() string {
 	return string(id)
 }
 
+// MemberID is the type for the member ID
 type MemberID string
 
+// String is the string representation of the member ID
 func (id MemberID) String() string {
 	return string(id)
 }
 
+// Group is the interface for the group entity
 type Group interface {
 	ID() ID
 	Version() uint32
@@ -33,6 +38,7 @@ type Group interface {
 	metadata.MultiTenant
 }
 
+// group is the implementation of the group entity
 type group struct {
 	id        ID
 	version   uint32
@@ -45,6 +51,7 @@ type group struct {
 
 var _ Group = (*group)(nil)
 
+// NewGroup creates a new group entity
 func NewGroup(opts ...GroupOption) (*group, error) {
 	group := &group{
 		id:        ID(uuid.Must(uuid.NewV4()).String()),
@@ -66,39 +73,48 @@ func NewGroup(opts ...GroupOption) (*group, error) {
 	return group, nil
 }
 
+// ID returns the group ID
 func (g group) ID() ID {
 	return g.id
 }
 
+// Version returns the group version
 func (g group) Version() uint32 {
 	return g.version
 }
 
+// Name returns the group name
 func (g group) Name() string {
 	return g.name
 }
 
+// Members returns the group members
 func (g group) Members() map[MemberID]struct{} {
 	return g.members
 }
 
+// SetMembers sets the group members
 func (g *group) SetMembers(members map[MemberID]struct{}) {
 	g.members = members
 	g.version += 1
 }
 
+// Tenancy returns the group tenancy
 func (g group) Tenancy() metadata.Tenancy {
 	return g.tenancy
 }
 
+// CreatedAt returns the group created at
 func (g group) CreatedAt() time.Time {
 	return g.createdAt
 }
 
+// DeletedAt returns the group deleted at
 func (g group) DeletedAt() *time.Time {
 	return g.deletedAt
 }
 
+// Delete marks the group as deleted
 func (g *group) Delete() {
 	now := time.Now()
 	g.deletedAt = &now

@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Model is the model for the user entity
 type Model struct {
 	Key       string     `db:"_key"`
 	ID        string     `db:"id"`
