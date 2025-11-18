@@ -75,7 +75,7 @@ func (svc *service) GetUserInfo(ctx context.Context, req apiV1.GetUserInfoReques
 		return apiV1.GetUserInfoResponse{}, err
 	}
 
-	userInfo, err := userMapper.ToUserInfo(user)
+	userInfo, err := ToUserInfo(user)
 	if err != nil {
 		return apiV1.GetUserInfoResponse{}, nil
 	}

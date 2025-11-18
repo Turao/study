@@ -2,7 +2,9 @@ package web
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/turao/topics/lib/web/middleware"
@@ -12,11 +14,12 @@ import (
 // server is the implementation of the web server
 type server struct {
 	*http.Server
-	userService apiV1.Users
+	userService       apiV1.Users
+	userStreamService apiV1.UsersStream
 }
 
 // NewServer creates a new web server
-func NewServer(userService apiV1.Users) *server {
+func NewServer(userService apiV1.Users, usersStreamService apiV1.UsersStream) *server {
 	router := mux.NewRouter()
 	headerValidator := middleware.HeaderValidator(
 		middleware.HeaderExists("x-user-uuid"),
@@ -29,7 +32,8 @@ func NewServer(userService apiV1.Users) *server {
 			Addr:    ":8080",
 			Handler: router,
 		},
-		userService: userService,
+		userService:       userService,
+		userStreamService: usersStreamService,
 	}
 
 	s.registerRoutes(router)
@@ -42,6 +46,7 @@ func (s *server) registerRoutes(router *mux.Router) {
 	router.HandleFunc("/user/{id}", s.handleGetUserInfo).Methods("GET")
 	router.HandleFunc("/user/{id}", s.handleDeleteUser).Methods("DELETE")
 	router.HandleFunc("/user", s.handleRegisterUser).Methods("POST")
+	router.HandleFunc("/sse/users", s.handleSSEUsers).Methods("GET")
 	http.Handle("/", router)
 }
 
@@ -114,4 +119,44 @@ func (s *server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
+}
+
+func appendSSEHeaders(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+}
+
+func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
+	appendSSEHeaders(w)
+	ctx := r.Context()
+
+	keepAliveTicker := time.NewTicker(1 * time.Second)
+	defer keepAliveTicker.Stop()
+	response, err := s.userStreamService.StreamUsers(ctx, apiV1.StreamUsersRequest{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	flusher := w.(http.Flusher)
+	for {
+		select {
+		case user := <-response.Users:
+			log.Println("received a new user", user)
+			data, err := json.Marshal(user)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Write(data)
+			flusher.Flush()
+		case <-keepAliveTicker.C:
+			log.Println("tick")
+		case <-ctx.Done():
+			log.Println("context cancelled")
+			http.Error(w, "context-exceeded", http.StatusRequestTimeout)
+			return
+		}
+	}
 }

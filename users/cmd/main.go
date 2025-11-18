@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/jmoiron/sqlx"
@@ -22,6 +21,7 @@ import (
 	userswebserver "github.com/turao/topics/users/server/web"
 	groupservice "github.com/turao/topics/users/service/group"
 	userservice "github.com/turao/topics/users/service/user"
+	userstreamervice "github.com/turao/topics/users/service/userstream"
 )
 
 func main() {
@@ -75,19 +75,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	listener, err := net.Listen("tcp", "localhost:9090")
+	// spin web server
+	userStreamService, err := userstreamervice.New()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	go func() {
-		if err := http.ListenAndServe("localhost:8081", nil); err != nil {
-			log.Fatalln(err)
-		}
-	}()
-
-	go func() {
-		userserver := userswebserver.NewServer(userService)
+		userserver := userswebserver.NewServer(userService, userStreamService)
 		if err := userserver.ListenAndServe(); err != nil {
 			log.Fatalln(err)
 		}
@@ -110,6 +105,12 @@ func main() {
 	userspb.RegisterUsersServer(registrar, server)
 	userspb.RegisterGroupsServer(registrar, server)
 	reflection.Register(registrar)
+
+	// start TCP listener for GRPC server
+	listener, err := net.Listen("tcp", "localhost:9090")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	if err := registrar.Serve(listener); err != nil {
 		log.Fatalln(err)

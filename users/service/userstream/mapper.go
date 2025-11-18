@@ -1,4 +1,4 @@
-package user
+package userstream
 
 import (
 	apiV1 "github.com/turao/topics/users/api/v1"
