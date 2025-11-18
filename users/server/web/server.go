@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/turao/topics/lib/web/middleware"
+	"github.com/turao/topics/lib/web/sse"
 	apiV1 "github.com/turao/topics/users/api/v1"
 )
 
@@ -148,10 +149,18 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			w.Write(data)
+
+			event := sse.Event{
+				Event: "user",
+				Data:  data,
+				ID:    &user.ID,
+			}
+
+			w.Write([]byte(event.String()))
 			flusher.Flush()
 		case <-keepAliveTicker.C:
-			w.Write([]byte(":keep-alive"))
+			w.Write([]byte(sse.KeepAlive))
+			flusher.Flush()
 		case <-ctx.Done():
 			http.Error(w, "context-exceeded", http.StatusRequestTimeout)
 			return
