@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -22,8 +21,8 @@ type server struct {
 func NewServer(userService apiV1.Users, usersStreamService apiV1.UsersStream) *server {
 	router := mux.NewRouter()
 	headerValidator := middleware.HeaderValidator(
-		middleware.HeaderExists("x-user-uuid"),
-		middleware.HeaderExists("x-tenancy"),
+	// middleware.HeaderExists("x-user-uuid"),
+	// middleware.HeaderExists("x-tenancy"),
 	)
 	router.Use(mux.MiddlewareFunc(headerValidator))
 
@@ -133,6 +132,7 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 
 	keepAliveTicker := time.NewTicker(1 * time.Second)
 	defer keepAliveTicker.Stop()
+
 	response, err := s.userStreamService.StreamUsers(ctx, apiV1.StreamUsersRequest{})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -143,7 +143,6 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case user := <-response.Users:
-			log.Println("received a new user", user)
 			data, err := json.Marshal(user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -152,9 +151,8 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 			w.Write(data)
 			flusher.Flush()
 		case <-keepAliveTicker.C:
-			log.Println("tick")
+			w.Write([]byte(":keep-alive"))
 		case <-ctx.Done():
-			log.Println("context cancelled")
 			http.Error(w, "context-exceeded", http.StatusRequestTimeout)
 			return
 		}
