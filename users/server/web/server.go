@@ -1,8 +1,10 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -129,10 +131,8 @@ func appendSSEHeaders(w http.ResponseWriter) {
 
 func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 	appendSSEHeaders(w)
-	ctx := r.Context()
-
-	keepAliveTicker := time.NewTicker(1 * time.Second)
-	defer keepAliveTicker.Stop()
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
+	defer cancel()
 
 	response, err := s.userStreamService.StreamUsers(ctx, apiV1.StreamUsersRequest{})
 	if err != nil {
@@ -141,29 +141,88 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	flusher := w.(http.Flusher)
-	for {
-		select {
-		case user := <-response.Users:
+	e0 := mapUserInfoChannelToSSEEventChannel(response.Users)
+	e1 := withKeepAlive(1 * time.Second)(e0)
+	e2 := withContext(ctx)(e1)
+	events := e2
+
+	for event := range events {
+		w.Write([]byte(event.Bytes()))
+		flusher.Flush()
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	flusher.Flush()
+}
+
+func mapUserInfoChannelToSSEEventChannel(users <-chan apiV1.UserInfo) chan sse.Event {
+	events := make(chan sse.Event)
+	go func() {
+		for user := range users {
 			data, err := json.Marshal(user)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			event := sse.Event{
+			events <- sse.DataEvent{
 				Event: "user",
 				Data:  data,
 				ID:    &user.ID,
 			}
-
-			w.Write([]byte(event.String()))
-			flusher.Flush()
-		case <-keepAliveTicker.C:
-			w.Write([]byte(sse.KeepAlive))
-			flusher.Flush()
-		case <-ctx.Done():
-			http.Error(w, "context-exceeded", http.StatusRequestTimeout)
-			return
 		}
+		close(events)
+	}()
+	return events
+}
+
+func withContext(ctx context.Context) func(<-chan sse.Event) chan sse.Event {
+	return func(inbound <-chan sse.Event) chan sse.Event {
+		outbound := make(chan sse.Event)
+
+		go func() {
+			for {
+				select {
+				case event := <-inbound:
+					outbound <- event
+				case <-ctx.Done():
+					close(outbound)
+					return
+				}
+			}
+		}()
+
+		return outbound
+	}
+}
+
+func withKeepAlive(interval time.Duration) func(<-chan sse.Event) chan sse.Event {
+	keepAliveTicker := time.NewTicker(interval)
+	return func(inbound <-chan sse.Event) chan sse.Event {
+		outbound := make(chan sse.Event)
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for event := range inbound {
+				outbound <- event
+			}
+			keepAliveTicker.Stop()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range keepAliveTicker.C {
+				outbound <- sse.KeepAliveEvent{}
+			}
+		}()
+
+		go func() {
+			wg.Wait()
+			close(outbound)
+		}()
+
+		return outbound
 	}
 }
