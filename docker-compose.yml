@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  storage-users:
+    image: postgres
+    container_name: storage-users
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=database
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pwd
+    volumes:
+      - ./storage/postgres/users/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
+    networks:
+      - global
+
+  storage-notifications:
+    image: postgres
+    container_name: storage-notifications
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=database
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pwd
+    volumes:
+      - ./storage/postgres/notifications/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
+    networks:
+      - global
+
+  zookeeper:
+    image: quay.io/debezium/zookeeper:2.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+    networks:
+      - global
+
+  kafka:
+    image: quay.io/debezium/kafka:2.1
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - BROKER_ID=1
+      - ZOOKEEPER_CONNECT=zookeeper
+    depends_on:
+      - zookeeper
+    networks:
+      - global
+
+  connect:
+    image: quay.io/debezium/connect:2.1
+    container_name: connect
+    ports:
+      - "8083:8083"
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+    depends_on:
+      - kafka
+    networks:
+      - global
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - DYNAMIC_CONFIG_ENABLED=true
+      - KAFKA_CLUSTERS_0_NAME=cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - global
+
+networks:
+  global:
+    driver: bridge
