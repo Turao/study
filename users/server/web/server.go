@@ -132,8 +132,7 @@ func appendSSEHeaders(w http.ResponseWriter) {
 
 func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 	appendSSEHeaders(w)
-	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
-	defer cancel()
+	ctx := r.Context()
 
 	response, err := s.userStreamService.StreamUsers(ctx, apiV1.StreamUsersRequest{})
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"net"
 	_ "net/http/pprof"
 
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
@@ -17,11 +19,12 @@ import (
 	userspb "github.com/turao/topics/proto/users"
 	grouprepository "github.com/turao/topics/users/repository/group"
 	userrepository "github.com/turao/topics/users/repository/user"
+	userstreamrepository "github.com/turao/topics/users/repository/userstream"
 	usersgrpcserver "github.com/turao/topics/users/server/grpc"
 	userswebserver "github.com/turao/topics/users/server/web"
 	groupservice "github.com/turao/topics/users/service/group"
 	userservice "github.com/turao/topics/users/service/user"
-	userstreamervice "github.com/turao/topics/users/service/userstream"
+	userstreamservice "github.com/turao/topics/users/service/userstream"
 )
 
 func main() {
@@ -75,8 +78,23 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// spin web server
-	userStreamService, err := userstreamervice.New()
+	subscriber, err := kafka.NewSubscriber(
+		kafka.SubscriberConfig{
+			Brokers:     []string{"localhost:9093"},
+			Unmarshaler: kafka.DefaultMarshaler{},
+		},
+		watermill.NewStdLogger(false, false),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	userStreamRepository, err := userstreamrepository.NewRepository(subscriber)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	userStreamService, err := userstreamservice.New(userStreamRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
