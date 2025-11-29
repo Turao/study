@@ -13,46 +13,50 @@ services:
     volumes:
       - ./storage/postgres/users/postgresql.conf:/etc/postgresql/postgresql.conf
     command: -c 'config_file=/etc/postgresql/postgresql.conf'
-    networks:
-      - global
 
-  storage-notifications:
-    image: postgres
-    container_name: storage-notifications
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_DB=database
-      - POSTGRES_USER=pguser
-      - POSTGRES_PASSWORD=pwd
-    volumes:
-      - ./storage/postgres/notifications/postgresql.conf:/etc/postgresql/postgresql.conf
-    command: -c 'config_file=/etc/postgresql/postgresql.conf'
-    networks:
-      - global
-
-  zookeeper:
-    image: quay.io/debezium/zookeeper:2.1
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-    networks:
-      - global
+  # storage-notifications:
+  #   image: postgres
+  #   container_name: storage-notifications
+  #   ports:
+  #     - "5433:5432"
+  #   environment:
+  #     - POSTGRES_DB=database
+  #     - POSTGRES_USER=pguser
+  #     - POSTGRES_PASSWORD=pwd
+  #   volumes:
+  #     - ./storage/postgres/notifications/postgresql.conf:/etc/postgresql/postgresql.conf
+  #   command: -c 'config_file=/etc/postgresql/postgresql.conf'
+  #   networks:
+  #     - global
 
   kafka:
-    image: quay.io/debezium/kafka:2.1
-    container_name: kafka
+    image: apache/kafka:latest
+    container_name: kafka-broker
     ports:
-      - "9092:9092"
+      - "9093:9093"
     environment:
-      - BROKER_ID=1
-      - ZOOKEEPER_CONNECT=zookeeper
-    depends_on:
-      - zookeeper
-    networks:
-      - global
+      KAFKA_NODE_ID: 1
+      # this instance is both the message broker AND the controller (responsible for admin operations)
+      KAFKA_PROCESS_ROLES: broker,controller
+      # KAFKA_LISTENERS define the listeners which kafka binds to for listening
+      # format: <listener-name>://<hostname>:<port>
+      # - CONTROLLER: controller (self) connects via localhost
+      # - DOCKER_COMPOSE_SERVICE: services within this docker-compose image connect to this listener
+      # - LOCAL_PROCESS: local processes (outside docker-compose) connect to this listener
+      # -- I don't know yet why its hostname is 'kafka' and not 'localhost'
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,DOCKER_COMPOSE_SERVICE://kafka:9092,LOCAL_PROCESS://kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_COMPOSE_SERVICE
+      # KAFKA_ADVERTISED_LISTENERS is the list of listeners that the "server" sends to clients upon initial connection (via metadata)
+      KAFKA_ADVERTISED_LISTENERS: DOCKER_COMPOSE_SERVICE://kafka:9092,LOCAL_PROCESS://localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP defines how each listener is authenticated 
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER_COMPOSE_SERVICE:PLAINTEXT,LOCAL_PROCESS:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
 
   connect:
     image: quay.io/debezium/connect:2.1
@@ -67,8 +71,6 @@ services:
       - STATUS_STORAGE_TOPIC=my_connect_statuses
     depends_on:
       - kafka
-    networks:
-      - global
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -81,8 +83,6 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     depends_on:
       - kafka
-    networks:
-      - global
 
 networks:
   global:

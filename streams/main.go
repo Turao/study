@@ -36,7 +36,7 @@ func main() {
 
 	subscriber, err := kafka.NewSubscriber(
 		kafka.SubscriberConfig{
-			Brokers:     []string{"localhost:9092"},
+			Brokers:     []string{"localhost:9093"},
 			Unmarshaler: kafka.DefaultMarshaler{},
 		},
 		logger,
@@ -47,7 +47,7 @@ func main() {
 
 	publisher, err := kafka.NewPublisher(
 		kafka.PublisherConfig{
-			Brokers:   []string{"localhost:9092"},
+			Brokers:   []string{"localhost:9093"},
 			Marshaler: kafka.DefaultMarshaler{},
 		},
 		logger,
