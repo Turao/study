@@ -196,31 +196,24 @@ func withContext(ctx context.Context) func(<-chan sse.Event) chan sse.Event {
 }
 
 func withKeepAlive(interval time.Duration) func(<-chan sse.Event) chan sse.Event {
-	keepAliveTicker := time.NewTicker(interval)
 	return func(inbound <-chan sse.Event) chan sse.Event {
 		outbound := make(chan sse.Event)
-		var wg sync.WaitGroup
 
-		wg.Add(1)
 		go func() {
-			defer wg.Done()
-			for event := range inbound {
+			keepAliveTicker := time.NewTicker(interval)
+			defer keepAliveTicker.Stop()
+
+			for {
+				select {
+				case event, ok := <-inbound:
+					if !ok {
+						return
+					}
 				outbound <- event
-			}
-			keepAliveTicker.Stop()
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for range keepAliveTicker.C {
+				case <-keepAliveTicker.C:
 				outbound <- sse.KeepAliveEvent{}
 			}
-		}()
-
-		go func() {
-			wg.Wait()
-			close(outbound)
+			}
 		}()
 
 		return outbound
