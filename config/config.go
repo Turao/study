@@ -39,3 +39,8 @@ type SurrealDBConfig struct {
 type Users struct {
 	DatabaseConfig PostgresConfig
 }
+
+// HTTPServerConfig is the configuration for an HTTP server
+type HTTPServerConfig struct {
+	Port uint
+}

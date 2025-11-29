@@ -82,7 +82,7 @@ func main() {
 	}
 
 	go func() {
-		userserver := userswebserver.NewServer(userService, userStreamService)
+		userserver := userswebserver.NewServer(userService, userStreamService, config.HTTPServerConfig{Port: 7070})
 		if err := userserver.ListenAndServe(); err != nil {
 			log.Fatalln(err)
 		}

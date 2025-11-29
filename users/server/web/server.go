@@ -3,11 +3,12 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/turao/topics/config"
 	"github.com/turao/topics/lib/web/middleware"
 	"github.com/turao/topics/lib/web/sse"
 	apiV1 "github.com/turao/topics/users/api/v1"
@@ -21,7 +22,7 @@ type server struct {
 }
 
 // NewServer creates a new web server
-func NewServer(userService apiV1.Users, usersStreamService apiV1.UsersStream) *server {
+func NewServer(userService apiV1.Users, usersStreamService apiV1.UsersStream, config config.HTTPServerConfig) *server {
 	router := mux.NewRouter()
 	headerValidator := middleware.HeaderValidator(
 	// middleware.HeaderExists("x-user-uuid"),
@@ -31,7 +32,7 @@ func NewServer(userService apiV1.Users, usersStreamService apiV1.UsersStream) *s
 
 	s := &server{
 		Server: &http.Server{
-			Addr:    ":8080",
+			Addr:    fmt.Sprintf(":%d", config.Port),
 			Handler: router,
 		},
 		userService:       userService,
@@ -146,12 +147,12 @@ func (s *server) handleSSEUsers(w http.ResponseWriter, r *http.Request) {
 	e2 := withContext(ctx)(e1)
 	events := e2
 
+	w.WriteHeader(http.StatusOK)
 	for event := range events {
 		w.Write([]byte(event.Bytes()))
 		flusher.Flush()
 	}
 
-	w.WriteHeader(http.StatusNoContent)
 	flusher.Flush()
 }
 
@@ -209,10 +210,10 @@ func withKeepAlive(interval time.Duration) func(<-chan sse.Event) chan sse.Event
 					if !ok {
 						return
 					}
-				outbound <- event
+					outbound <- event
 				case <-keepAliveTicker.C:
-				outbound <- sse.KeepAliveEvent{}
-			}
+					outbound <- sse.KeepAliveEvent{}
+				}
 			}
 		}()
 
